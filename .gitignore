@@ -1,3 +1,7 @@
+### -- TODO: UE4 git ignore
+
+### -- Texstuff below -- 
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
@@ -6,14 +10,15 @@
 *.fls
 *.out
 *.toc
+*.backup
 
 ## Intermediate documents:
 *.dvi
 *-converted-to.*
 # these rules might exclude image files for figures etc.
-# *.ps
-# *.eps
-# *.pdf
+*.ps
+*.eps
+*.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl
