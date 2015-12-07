@@ -1,0 +1,11 @@
+/*
+!Source/
+!Content/
+!Config/
+!Plugins/
+!*.uasset
+!*.uproject
+!*.cs
+!*.h
+!*.cpp
+!*.diff
