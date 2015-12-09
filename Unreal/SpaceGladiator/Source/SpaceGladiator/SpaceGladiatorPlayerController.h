@@ -19,6 +19,8 @@ public:
 	void SetupInputComponent() override;
 	void TurnLeft();
 	void TurnRight();
+	void RotateCamera(FRotator Rotation);
 	void Turn(float Value);
+	void TiltCamera(float Value);
 	void PlayerTick(float DeltaTime);
 };

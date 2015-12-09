@@ -2,6 +2,7 @@
 
 #include "SpaceGladiator.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "SpaceGladiatorPlayerController.h"
 
 
@@ -12,6 +13,7 @@ void ASpaceGladiatorPlayerController::SetupInputComponent() {
 	InputComponent->BindAction(TEXT("TurnRight"), IE_Pressed, this, &ASpaceGladiatorPlayerController::TurnRight);
 
 	InputComponent->BindAxis(TEXT("Turn"), this, &ASpaceGladiatorPlayerController::Turn);
+	InputComponent->BindAxis(TEXT("Tilt"), this, &ASpaceGladiatorPlayerController::TiltCamera);
 }
 
 void ASpaceGladiatorPlayerController::TurnLeft() {
@@ -21,6 +23,7 @@ void ASpaceGladiatorPlayerController::TurnLeft() {
 	FRotator rotation = ControlRotation;
 	rotation.Add(0, -90.0f, 0);
 	SetControlRotation(rotation);
+	RotateCamera(FRotator(0,90.0f,0));
 }
 
 void ASpaceGladiatorPlayerController::TurnRight() {
@@ -28,12 +31,24 @@ void ASpaceGladiatorPlayerController::TurnRight() {
 	FRotator rotation = ControlRotation;
 	rotation.Add(0, 90.0f, 0);
 	SetControlRotation(rotation);
+	RotateCamera(FRotator(0,-90.0f,0));
 }
 
 void ASpaceGladiatorPlayerController::Turn(float Value) {
+		RotateCamera(FRotator(0,10.0f * Value, 0));
+}
+
+void ASpaceGladiatorPlayerController::TiltCamera(float Value) {
+	RotateCamera(FRotator(10.0f * Value, 0, 0));
+}
+
+void ASpaceGladiatorPlayerController::RotateCamera(FRotator Rotation) {
 	APawn *pawn = GetPawn();
-	if(IsValid(pawn)) {
-		pawn->AddControllerYawInput(Value);
+	if (IsValid(pawn)) {
+		USpringArmComponent* springArm = (USpringArmComponent*)pawn->FindComponentByClass(USpringArmComponent::StaticClass());
+		if (IsValid(springArm)) {
+			springArm->AddRelativeRotation(Rotation);
+		}
 	}
 }
 
