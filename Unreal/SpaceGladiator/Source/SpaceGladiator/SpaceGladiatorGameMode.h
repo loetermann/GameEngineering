@@ -13,7 +13,8 @@ class SPACEGLADIATOR_API ASpaceGladiatorGameMode : public AGameMode
 {
 	GENERATED_BODY()
 	
-	
+public:
+	ASpaceGladiatorGameMode(const FObjectInitializer &ObjectInitializer);
 	
 	
 };
