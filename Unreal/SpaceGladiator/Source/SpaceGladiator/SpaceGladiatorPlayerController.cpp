@@ -23,7 +23,9 @@ void ASpaceGladiatorPlayerController::TurnLeft() {
 	FRotator rotation = ControlRotation;
 	rotation.Add(0, -90.0f, 0);
 	SetControlRotation(rotation);
-	RotateCamera(FRotator(0,90.0f,0));
+	FRotator rot = FRotator(0, 90.0f, 0);
+	RotateCamera(rot);
+	RotateTargeting(rot);
 }
 
 void ASpaceGladiatorPlayerController::TurnRight() {
@@ -31,11 +33,15 @@ void ASpaceGladiatorPlayerController::TurnRight() {
 	FRotator rotation = ControlRotation;
 	rotation.Add(0, 90.0f, 0);
 	SetControlRotation(rotation);
-	RotateCamera(FRotator(0,-90.0f,0));
+	FRotator rot = FRotator(0, -90.0f, 0);
+	RotateCamera(rot);
+	RotateTargeting(rot);
 }
 
 void ASpaceGladiatorPlayerController::Turn(float Value) {
-		RotateCamera(FRotator(0,10.0f * Value, 0));
+	FRotator rot = FRotator(0,10.0f * Value, 0);
+		RotateCamera(rot);
+		RotateTargeting(rot);
 }
 
 void ASpaceGladiatorPlayerController::TiltCamera(float Value) {
@@ -48,9 +54,32 @@ void ASpaceGladiatorPlayerController::RotateCamera(FRotator Rotation) {
 		USpringArmComponent* springArm = (USpringArmComponent*)pawn->FindComponentByClass(USpringArmComponent::StaticClass());
 		if (IsValid(springArm)) {
 			springArm->AddRelativeRotation(Rotation);
+			FTransform transform = springArm->GetRelativeTransform();
+			FRotator rot = transform.Rotator();
+			if (rot.Pitch < -75) {
+				rot.Pitch = -75;
+			}
+			else if (rot.Pitch > 0) {
+				rot.Pitch = 0;
+			}
+			rot.Roll = 0;
+			springArm->SetRelativeRotation(rot);
 		}
 	}
 }
+
+void ASpaceGladiatorPlayerController::RotateTargeting(FRotator Rotation)
+{
+	APawn *pawn = GetPawn();
+	if (IsValid(pawn)) {
+		UStaticMeshComponent* targeting = (UStaticMeshComponent*)pawn->FindComponentByClass(UStaticMeshComponent::StaticClass());
+		if (IsValid(targeting)) {
+			targeting->AddRelativeRotation(Rotation);
+		}
+	}
+}
+
+
 
 void ASpaceGladiatorPlayerController::PlayerTick(float DeltaTime) {
 	Super::PlayerTick(DeltaTime);
