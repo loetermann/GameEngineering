@@ -44,7 +44,7 @@ void ASGCharacter::Fire_Implementation(FVector direction) {
 		SpawnParams.Owner = this;
 		SpawnParams.Instigator = Instigator;
 		FVector location = GetActorLocation();
-		location.Z = location.Z / 2;
+		location.Z = location.Z - 20;
 		ALaserProjectile* const Projectile = World->SpawnActor<ALaserProjectile>(ProjectileClass, location, direction.Rotation(), SpawnParams);
 		if (Projectile)
 		{

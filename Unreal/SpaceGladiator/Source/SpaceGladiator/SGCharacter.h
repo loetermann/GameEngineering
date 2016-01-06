@@ -28,7 +28,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 
-	UFUNCTION(Reliable, Server, WithValidation)
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
 	void Fire(FVector direction);
 	void Fire_Implementation(FVector direction);
 	bool Fire_Validate(FVector direction);
