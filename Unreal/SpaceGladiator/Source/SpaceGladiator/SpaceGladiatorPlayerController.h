@@ -14,7 +14,6 @@ class SPACEGLADIATOR_API ASpaceGladiatorPlayerController : public APlayerControl
 	GENERATED_BODY()
 	
 	
-	
 public:
 	void SetupInputComponent() override;
 	void TurnLeft();
@@ -23,4 +22,5 @@ public:
 	void Turn(float Value);
 	void TiltCamera(float Value);
 	void PlayerTick(float DeltaTime);
+	void Fire();
 };

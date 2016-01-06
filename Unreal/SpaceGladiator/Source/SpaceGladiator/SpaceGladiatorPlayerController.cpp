@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "SpaceGladiatorPlayerController.h"
+#include "SGCharacter.h"
 
 
 
@@ -14,6 +15,8 @@ void ASpaceGladiatorPlayerController::SetupInputComponent() {
 
 	InputComponent->BindAxis(TEXT("Turn"), this, &ASpaceGladiatorPlayerController::Turn);
 	InputComponent->BindAxis(TEXT("Tilt"), this, &ASpaceGladiatorPlayerController::TiltCamera);
+
+	InputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &ASpaceGladiatorPlayerController::Fire);
 }
 
 void ASpaceGladiatorPlayerController::TurnLeft() {
@@ -58,4 +61,15 @@ void ASpaceGladiatorPlayerController::PlayerTick(float DeltaTime) {
 	if (IsValid(pawn)) {
 		pawn->GetMovementComponent()->AddInputVector(pawn->GetActorForwardVector());
 	}
+}
+
+void ASpaceGladiatorPlayerController::Fire() {
+	ASGCharacter* Character = Cast<ASGCharacter>(GetPawn());
+	// Get the camera transform
+	FRotator CameraRot;
+	USpringArmComponent* springArm = (USpringArmComponent*)Character->FindComponentByClass(USpringArmComponent::StaticClass());
+	if (IsValid(springArm)) {
+		CameraRot = springArm->GetComponentRotation();
+	}
+	Character->Fire(CameraRot.Vector());
 }
