@@ -15,10 +15,12 @@ class SPACEGLADIATOR_API ASpaceGladiatorPlayerController : public APlayerControl
 	
 	
 public:
+	void BeginPlayingState() override;
 	void SetupInputComponent() override;
 	void TurnLeft();
 	void TurnRight();
 	void RotateCamera(FRotator Rotation);
+	void RotateTargeting(FRotator Rotation);
 	void Turn(float Value);
 	void TiltCamera(float Value);
 	void PlayerTick(float DeltaTime);
