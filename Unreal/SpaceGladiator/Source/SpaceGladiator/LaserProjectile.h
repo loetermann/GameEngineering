@@ -10,10 +10,14 @@ class ALaserProjectile : public AActor
 {
 	GENERATED_BODY()
 
-
 	FVector direction;
+	bool recalled;
 		
 public:
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Projectile)
+		bool explodeOnDestroy;
 
 	/** Capsule collision component */
 	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
@@ -29,5 +33,10 @@ public:
 	virtual void Tick( float DeltaSeconds ) override;
 
 	void SetDirection(FVector dir);
+
+	UFUNCTION()
+	void Hit(AActor* OtherActor);
+
+	void Recall();
 	
 };

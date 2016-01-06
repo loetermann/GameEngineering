@@ -25,4 +25,5 @@ public:
 	void TiltCamera(float Value);
 	void PlayerTick(float DeltaTime);
 	void Fire();
+	void Recall();
 };

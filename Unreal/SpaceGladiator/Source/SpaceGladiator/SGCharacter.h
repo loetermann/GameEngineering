@@ -32,4 +32,9 @@ public:
 	void Fire(FVector direction);
 	void Fire_Implementation(FVector direction);
 	bool Fire_Validate(FVector direction);
+
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
+	void RecallProjectiles();
+	void RecallProjectiles_Implementation();
+	bool RecallProjectiles_Validate();
 };

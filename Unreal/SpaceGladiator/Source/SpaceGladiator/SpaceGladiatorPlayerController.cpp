@@ -25,6 +25,7 @@ void ASpaceGladiatorPlayerController::SetupInputComponent() {
 	InputComponent->BindAxis(TEXT("Tilt"), this, &ASpaceGladiatorPlayerController::TiltCamera);
 
 	InputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &ASpaceGladiatorPlayerController::Fire);
+	InputComponent->BindAction(TEXT("Recall"), IE_Pressed, this, &ASpaceGladiatorPlayerController::Recall);
 }
 
 void ASpaceGladiatorPlayerController::TurnLeft() {
@@ -109,4 +110,8 @@ void ASpaceGladiatorPlayerController::Fire() {
 		CameraRot = springArm->GetComponentRotation();
 	}
 	Character->Fire(CameraRot.Vector());
+}
+
+void ASpaceGladiatorPlayerController::Recall() {
+	Cast<ASGCharacter>(GetPawn())->RecallProjectiles();
 }

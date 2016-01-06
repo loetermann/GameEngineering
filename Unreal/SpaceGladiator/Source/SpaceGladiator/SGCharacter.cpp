@@ -12,6 +12,7 @@ ASGCharacter::ASGCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	ProjectileClass = ALaserProjectile::StaticClass();
+	SetActorEnableCollision(true);
 
 }
 
@@ -53,5 +54,17 @@ void ASGCharacter::Fire_Implementation(FVector direction) {
 	}
 }
 bool ASGCharacter::Fire_Validate(FVector direction) {
+	return true;
+}
+
+void ASGCharacter::RecallProjectiles_Implementation() {
+	for (TActorIterator<ALaserProjectile> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		if (ActorItr->GetOwner() == this) {
+			ActorItr->Recall();
+		}
+	}
+}
+bool ASGCharacter::RecallProjectiles_Validate() {
 	return true;
 }
