@@ -10,7 +10,9 @@ class SPACEGLADIATOR_API ARotatingActor : public AActor
 {
 	GENERATED_BODY()
 
-	float YawPerSeconds = 40.0f;
+	UPROPERTY(EditAnywhere, Category="Properties")
+	float YawPerSeconds;
+
 public:	
 	// Sets default values for this actor's properties
 	ARotatingActor();
