@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "WallSegment.h"
 #include "GameFramework/Character.h"
 #include "SGCharacter.generated.h"
 
@@ -37,4 +38,15 @@ public:
 	void RecallProjectiles();
 	void RecallProjectiles_Implementation();
 	bool RecallProjectiles_Validate();
+
+
+	AWallSegment *CurrentWall;
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
+		void PlaceWall();
+	void PlaceWall_Implementation();
+	bool PlaceWall_Validate();
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
+		void AddWallSegment();
+	void AddWallSegment_Implementation();
+	bool AddWallSegment_Validate();
 };

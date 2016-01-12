@@ -40,7 +40,8 @@ void ASpaceGladiatorPlayerController::TurnLeft() {
 	FRotator rot = FRotator(0, 90.0f, 0);
 	RotateCamera(rot);
 	RotateTargeting(rot);
-	AddWallSegment();
+
+	Cast<ASGCharacter>(GetPawn())->AddWallSegment();
 }
 
 void ASpaceGladiatorPlayerController::TurnRight() {
@@ -51,7 +52,7 @@ void ASpaceGladiatorPlayerController::TurnRight() {
 	FRotator rot = FRotator(0, -90.0f, 0);
 	RotateCamera(rot);
 	RotateTargeting(rot);
-	AddWallSegment();
+	Cast<ASGCharacter>(GetPawn())->AddWallSegment();
 }
 
 void ASpaceGladiatorPlayerController::Turn(float Value) {
@@ -103,10 +104,6 @@ void ASpaceGladiatorPlayerController::PlayerTick(float DeltaTime) {
 	if (IsValid(pawn)) {
 		pawn->GetMovementComponent()->AddInputVector(pawn->GetActorForwardVector());
 	}
-	if (IsValid(CurrentWall) && IsValid(pawn)) {
-		CurrentWall->Spline->SetLocationAtSplinePoint(1, pawn->GetActorLocation() - 100 * pawn->GetActorForwardVector(),ESplineCoordinateSpace::World);
-		CurrentWall->UpdateSplineMesh();
-	}
 }
 
 void ASpaceGladiatorPlayerController::Fire() {
@@ -125,40 +122,5 @@ void ASpaceGladiatorPlayerController::Recall() {
 }
 
 void ASpaceGladiatorPlayerController::PlaceWall() {
-	if (CurrentWall) {
-		CurrentWall = 0;
-		return;
-	}
-	CurrentWall = Cast<AWallSegment>(GetWorld()->SpawnActor(AWallSegment::StaticClass()));
-	CurrentWall->SetActorEnableCollision(true);
-	
-
-	APawn *pawn = GetPawn();
-	if (IsValid(pawn)) {
-		CurrentWall->SetActorLocation(pawn->GetActorLocation());
-		CurrentWall->Spline->SetLocationAtSplinePoint(0, pawn->GetActorLocation() - 100 * pawn->GetActorForwardVector(),ESplineCoordinateSpace::World);
-		CurrentWall->Spline->SetLocationAtSplinePoint(1, pawn->GetActorLocation() - 100 * pawn->GetActorForwardVector(), ESplineCoordinateSpace::World);
-		CurrentWall->UpdateSplineMesh();
-		CurrentWall->OwningCharacter = Cast<ASGCharacter>(pawn);
-	}
-}
-
-void ASpaceGladiatorPlayerController::AddWallSegment() {
-	if (!CurrentWall) {
-		return;
-	}
-	AWallSegment *newWallSegment = Cast<AWallSegment>(GetWorld()->SpawnActor(AWallSegment::StaticClass()));
-	newWallSegment->SetActorEnableCollision(true);
-	newWallSegment->PrevSegment = CurrentWall;
-	CurrentWall->NextSegment = newWallSegment;
-
-	APawn *pawn = GetPawn();
-	if (IsValid(pawn)) {
-		newWallSegment->SetActorLocation(pawn->GetActorLocation());
-		newWallSegment->Spline->SetLocationAtSplinePoint(0, pawn->GetActorLocation() - 100 * pawn->GetActorForwardVector(), ESplineCoordinateSpace::World);
-		newWallSegment->Spline->SetLocationAtSplinePoint(1, pawn->GetActorLocation() - 100 * pawn->GetActorForwardVector(), ESplineCoordinateSpace::World);
-		newWallSegment->UpdateSplineMesh();
-		newWallSegment->OwningCharacter = Cast<ASGCharacter>(pawn);
-	}
-	CurrentWall = newWallSegment;
+	Cast<ASGCharacter>(GetPawn())->PlaceWall();
 }

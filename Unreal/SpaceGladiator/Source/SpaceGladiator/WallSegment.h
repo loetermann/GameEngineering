@@ -5,7 +5,6 @@
 #include "GameFramework/Actor.h"
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
-#include "SGCharacter.h"
 #include "WallSegment.generated.h"
 
 UCLASS()
@@ -30,8 +29,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	AWallSegment *PrevSegment;
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	ASGCharacter *OwningCharacter;
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	//ASGCharacter *OwningCharacter;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	USceneComponent *RootScene;
@@ -43,6 +42,13 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Spline")
 	UStaticMesh *SplineMesh;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void UpdateSplineLocation(FVector location);
+	void UpdateSplineLocation_Implementation(FVector location);
+	UFUNCTION(NetMulticast, Reliable)
+		void UpdateSplineStartLocation(FVector location);
+	void UpdateSplineStartLocation_Implementation(FVector location);
 
 	void UpdateSplineMesh();
 };

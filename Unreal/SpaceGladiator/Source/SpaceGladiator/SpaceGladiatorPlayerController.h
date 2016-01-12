@@ -3,7 +3,6 @@
 #pragma once
 
 #include "GameFramework/PlayerController.h"
-#include "WallSegment.h"
 #include "SpaceGladiatorPlayerController.generated.h"
 
 /**
@@ -27,9 +26,6 @@ public:
 	void PlayerTick(float DeltaTime);
 	void Fire();
 	void Recall();
-	
-
-	AWallSegment *CurrentWall;
 	void PlaceWall();
-	void AddWallSegment();
+
 };

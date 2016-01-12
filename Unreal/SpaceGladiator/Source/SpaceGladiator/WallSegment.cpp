@@ -7,6 +7,9 @@
 // Sets default values
 AWallSegment::AWallSegment()
 {
+	bReplicates = true;
+	bAlwaysRelevant = true;
+	bReplicateMovement = true;
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -21,8 +24,6 @@ AWallSegment::AWallSegment()
 	if (SplineMesh.Object) {
 		this->SplineMesh = SplineMesh.Object;
 	}
-
-	
 }
 
 // Called when the game starts or when spawned
@@ -43,41 +44,52 @@ void AWallSegment::OnConstruction(const FTransform & Transform)
 {
 	Super::OnConstruction(Transform);
 	this->SetActorEnableCollision(false);
+
 	UpdateSplineMesh();
 }
 
 void AWallSegment::UpdateSplineMesh() {
-	UE_LOG(LogTemp, Warning, TEXT("OnConstruction %d"), Spline->GetNumberOfSplinePoints());
-	//for (int i = 0; i < Spline->GetNumberOfSplinePoints() - 1; i++) {
-	int i = 0;
-		UE_LOG(LogTemp, Warning, TEXT("Adding Spline Mesh!!!!"));
-		if (!SplineMeshComponent) {
-			SplineMeshComponent = NewObject<USplineMeshComponent>(this, USplineMeshComponent::StaticClass());//<USplineMeshComponent>(USplineMeshComponent::StaticClass(), this);
-		}
-
-		SplineMeshComponent->SetStaticMesh(this->SplineMesh);
-		SplineMeshComponent->SetStartScale(FVector2D(0.25, 1));
-		SplineMeshComponent->SetEndScale(FVector2D(0.25, 1));
-		SplineMeshComponent->AttachParent = Spline;
-		
-		SplineMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		SplineMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		SplineMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-		SplineMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-
-		
-		SplineMeshComponent->SetMobility(EComponentMobility::Movable);
-		
-		//newSplineMesh->SetCollisionProfileName()
-
-		FVector pStart, tangentStart, pEnd, tangentEnd;
-		Spline->GetLocalLocationAndTangentAtSplinePoint(i, pStart, tangentStart);
-		Spline->GetLocalLocationAndTangentAtSplinePoint(i + 1, pEnd, tangentEnd);
-
-		SplineMeshComponent->SetStartAndEnd(pStart, tangentStart, pEnd, tangentEnd);
-		SplineMeshComponent->RecreateCollision();
-
+	//if (HasAuthority()) {
+		//UE_LOG(LogTemp, Warning, TEXT("updated on server"));
 	//}
+
+	//UE_LOG(LogTemp, Warning, TEXT("Adding Spline Mesh!!!!"));
+	if (!SplineMeshComponent) {
+		SplineMeshComponent = NewObject<USplineMeshComponent>(this, USplineMeshComponent::StaticClass());//<USplineMeshComponent>(USplineMeshComponent::StaticClass(), this);
+	}
+
+	SplineMeshComponent->SetStaticMesh(this->SplineMesh);
+	SplineMeshComponent->SetStartScale(FVector2D(0.25, 1));
+	SplineMeshComponent->SetEndScale(FVector2D(0.25, 1));
+	SplineMeshComponent->AttachParent = Spline;
+
+	SplineMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SplineMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	SplineMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	SplineMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+
+
+	SplineMeshComponent->SetMobility(EComponentMobility::Movable);
+
+	//newSplineMesh->SetCollisionProfileName()
+
+
+
+	FVector pStart, tangentStart, pEnd, tangentEnd;
+	Spline->GetLocalLocationAndTangentAtSplinePoint(0, pStart, tangentStart);
+	Spline->GetLocalLocationAndTangentAtSplinePoint(1, pEnd, tangentEnd);
+
+	SplineMeshComponent->SetStartAndEnd(pStart, tangentStart, pEnd, tangentEnd);
+	SplineMeshComponent->RecreateCollision();
 	RegisterAllComponents();
 }
 
+void AWallSegment::UpdateSplineLocation_Implementation(FVector location) {
+	Spline->SetLocationAtSplinePoint(1, location, ESplineCoordinateSpace::World);
+	UpdateSplineMesh();
+}
+
+void AWallSegment::UpdateSplineStartLocation_Implementation(FVector location) {
+	Spline->SetLocationAtSplinePoint(0, location, ESplineCoordinateSpace::World);
+	UpdateSplineMesh();
+}
