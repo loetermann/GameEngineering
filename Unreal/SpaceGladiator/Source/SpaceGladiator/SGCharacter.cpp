@@ -3,6 +3,7 @@
 #include "SpaceGladiator.h"
 #include "SGCharacter.h"
 #include "LaserProjectile.h"
+#include "UnrealNetwork.h"
 
 
 // Sets default values
@@ -14,11 +15,14 @@ ASGCharacter::ASGCharacter()
 	ProjectileClass = ALaserProjectile::StaticClass();
 	SetActorEnableCollision(true);
 
+	bReplicates = true;
+
 }
 
 // Called when the game starts or when spawned
 void ASGCharacter::BeginPlay()
 {
+	Health = 100;
 	Super::BeginPlay();
 	
 }
@@ -116,4 +120,34 @@ void ASGCharacter::AddWallSegment_Implementation() {
 
 bool ASGCharacter::AddWallSegment_Validate() {
 	return true;
+}
+
+float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) {
+	// Call the base class - this will tell us how much damage to apply  
+	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	Health -= ActualDamage;
+	if (Health <= 0) {
+		explode();
+		respawn();
+	}
+	return ActualDamage;
+}
+
+void ASGCharacter::explode_Implementation() {
+	explodeEvent();
+}
+
+void ASGCharacter::respawn() {
+	//GetWorld()->GetAuthGameMode()->RestartPlayer(GetController());
+	Health = 100;
+	SetActorLocation(GetWorld()->GetAuthGameMode()->ChoosePlayerStart(GetController())->GetActorLocation());
+}
+
+
+void ASGCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// Replicate to everyone
+	DOREPLIFETIME(ASGCharacter, Health);
 }

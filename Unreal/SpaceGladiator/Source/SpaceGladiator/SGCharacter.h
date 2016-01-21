@@ -17,6 +17,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class ALaserProjectile> ProjectileClass;
 
+	/** Health */
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Player)
+		float Health;
+
 	// Sets default values for this character's properties
 	ASGCharacter();
 
@@ -49,4 +53,12 @@ public:
 		void AddWallSegment();
 	void AddWallSegment_Implementation();
 	bool AddWallSegment_Validate();
+
+	float TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser) override;
+	UFUNCTION(Reliable, NetMulticast)
+	void explode();
+	void explode_Implementation();
+	UFUNCTION(BlueprintImplementableEvent, meta = (FriendlyName = "Explode"))
+	void explodeEvent();
+	void respawn();
 };

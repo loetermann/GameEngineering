@@ -3,6 +3,7 @@
 #include "SpaceGladiator.h"
 #include "LaserProjectile.h"
 #include "SGCharacter.h"
+#include "UnrealNetwork.h"
 
 
 // Sets default values
@@ -38,7 +39,7 @@ void ALaserProjectile::Tick( float DeltaTime )
 	if (recalled) {
 		direction = (GetOwner()->GetActorLocation() - GetActorLocation());
 		if (direction.Size() < 4000*DeltaTime) {
-			explodeOnDestroy = false;
+			NoExplosion();
 			Destroy();
 		}
 		direction.Normalize();
@@ -52,7 +53,7 @@ void ALaserProjectile::Tick( float DeltaTime )
 	}
 	if (!SetActorLocation(GetActorLocation() + (direction*DeltaTime), true)) {
 		if (HasAuthority()) {
-			Destroy();
+			 Destroy();
 		}
 	}
 }
@@ -69,7 +70,13 @@ void ALaserProjectile::Hit(AActor* OtherActor) {
 //	UE_LOG(LogTemp, Warning, TEXT("HIT %s"), *OtherActor->GetName());
 	if (HasAuthority()) {
 		if (GetOwner() != OtherActor) {
-			if (OtherActor->GetClass()->IsChildOf(ACharacter::StaticClass())) {
+			if (OtherActor->GetClass()->IsChildOf(ASGCharacter::StaticClass())) {
+				if(recalled) {
+					Cast<ASGCharacter>(OtherActor)->TakeDamage(80, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
+				}
+				else {
+					Cast<ASGCharacter>(OtherActor)->TakeDamage(10, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
+				}
 			}
 			if (!OtherActor->GetClass()->IsChildOf(ALaserProjectile::StaticClass())) {
 				Destroy();
@@ -80,4 +87,21 @@ void ALaserProjectile::Hit(AActor* OtherActor) {
 
 void ALaserProjectile::Recall() {
 	recalled = true;
+}
+
+void ALaserProjectile::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// Replicate to everyone
+	DOREPLIFETIME(ALaserProjectile, explodeOnDestroy);
+}
+
+
+void ALaserProjectile::NoExplosion_Implementation() {
+	explodeOnDestroy = false;
+}
+
+bool ALaserProjectile::NoExplosion_Validate() {
+	return true;
 }
