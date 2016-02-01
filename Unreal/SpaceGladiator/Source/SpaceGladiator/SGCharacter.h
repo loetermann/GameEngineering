@@ -42,8 +42,10 @@ public:
 	void RecallProjectiles();
 	void RecallProjectiles_Implementation();
 	bool RecallProjectiles_Validate();
-
-
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UClass *WallSegmentClass;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	AWallSegment *CurrentWall;
 	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
 		void PlaceWall();

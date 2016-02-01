@@ -2,9 +2,12 @@
 
 #pragma once
 
+#include "Particles/ParticleSystemComponent.h"
+#include "Particles/ParticleSystem.h"
 #include "GameFramework/Actor.h"
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
+//#include "SGCharacter.h"
 #include "WallSegment.generated.h"
 
 UCLASS()
@@ -33,11 +36,19 @@ public:
 	//ASGCharacter *OwningCharacter;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UParticleSystemComponent *WallBeams;
+
+	void SetBeamSource(AActor *source);
+	void SetBeamTarget(AActor *target);
+
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	//UBoxComponent *CollisionBox;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	USceneComponent *RootScene;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	USplineComponent *Spline;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	USplineMeshComponent *SplineMeshComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category="Spline")
@@ -51,4 +62,8 @@ public:
 	void UpdateSplineStartLocation_Implementation(FVector location);
 
 	void UpdateSplineMesh();
+	UFUNCTION()
+	void OnBeginOverlap(AActor *OtherActor);
+
+	float IgnoreOverlapTime;
 };
