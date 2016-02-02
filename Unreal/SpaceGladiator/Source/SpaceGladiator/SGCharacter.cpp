@@ -100,13 +100,13 @@ void ASGCharacter::PlaceWall_Implementation() {
 	CurrentWall = Cast<AWallSegment>(GetWorld()->SpawnActor(WallSegmentClass));
 	CurrentWall->SetActorEnableCollision(true);
 
-		CurrentWall->SetActorLocation(GetActorLocation());
-		CurrentWall->SetActorRotation(GetActorRotation());
-		CurrentWall->Spline->SetLocationAtSplinePoint(0, GetActorLocation(), ESplineCoordinateSpace::World);
-		CurrentWall->Spline->SetLocationAtSplinePoint(1, GetActorLocation(), ESplineCoordinateSpace::World);
-		CurrentWall->UpdateSplineMesh();
-		CurrentWall->UpdateSplineStartLocation(GetActorLocation());
-		CurrentWall->SetBeamTarget(this);
+	CurrentWall->SetActorLocation(GetActorLocation());
+	CurrentWall->SetActorRotation(GetActorRotation());
+	CurrentWall->Spline->SetLocationAtSplinePoint(0, GetActorLocation(), ESplineCoordinateSpace::World);
+	CurrentWall->Spline->SetLocationAtSplinePoint(1, GetActorLocation(), ESplineCoordinateSpace::World);
+	CurrentWall->UpdateSplineMesh();
+	CurrentWall->UpdateSplineStartLocation(GetActorLocation());
+	CurrentWall->SetBeamTarget(this);
 }
 bool ASGCharacter::PlaceWall_Validate() {
 	return true;
@@ -123,7 +123,7 @@ void ASGCharacter::AddWallSegment_Implementation() {
 	newWallSegment->SetActorRotation(GetActorRotation());
 	newWallSegment->SetActorEnableCollision(true);
 	newWallSegment->PrevSegment = CurrentWall;
-
+	
 	newWallSegment->SetBeamSource(newWallSegment);
 	newWallSegment->SetBeamTarget(this);
 		newWallSegment->SetActorLocation(GetActorLocation());
@@ -167,4 +167,5 @@ void ASGCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutL
 
 	// Replicate to everyone
 	DOREPLIFETIME(ASGCharacter, Health);
+	DOREPLIFETIME(ASGCharacter, Color);
 }
