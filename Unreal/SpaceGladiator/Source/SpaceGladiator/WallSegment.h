@@ -70,5 +70,7 @@ public:
 	UFUNCTION()
 	void OnBeginOverlap(AActor *OtherActor);
 
+	UFUNCTION(BlueprintCallable, Category="Space Gladiator")
+	void SetBeamColor(FColor Color);
 //	float IgnoreOverlapTime;
 };

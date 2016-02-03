@@ -33,7 +33,11 @@ AWallSegment::AWallSegment()
 	TargetParam.Name = FName(TEXT("Target"));
 	TargetParam.ParamType = EParticleSysParamType::PSPT_Actor;
 	WallBeams->InstanceParameters.Add(TargetParam);
-
+	FParticleSysParam BeamColor = FParticleSysParam();
+	BeamColor.Name = FName(TEXT("Color"));
+	BeamColor.ParamType = EParticleSysParamType::PSPT_Color;
+	BeamColor.Color = FColor(255, 255, 255);
+	WallBeams->InstanceParameters.Add(BeamColor);
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleTemplate(TEXT("ParticleSystem'/Game/Particles/P_Beam.P_Beam'"));
 	if (ParticleTemplate.Object) {
@@ -158,4 +162,10 @@ void AWallSegment::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutL
 
 	// Replicate to everyone
 	DOREPLIFETIME(AWallSegment, NextSegment);
+}
+
+void AWallSegment::SetBeamColor(FColor Color) {
+	if (IsValid(WallBeams)) {
+		WallBeams->InstanceParameters[2].Color = Color;
+	}
 }
