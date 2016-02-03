@@ -12,6 +12,9 @@ class SPACEGLADIATOR_API ASGCharacter : public ACharacter
 	GENERATED_BODY()
 		
 public:
+
+	FTimerHandle RespawnTimerHandle;
+	FTimerHandle ReviveTimerHandle;
 	
 	/** Projectile class to spawn */
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
@@ -49,7 +52,7 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UClass *WallSegmentClass;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Replicated)
 	AWallSegment *CurrentWall;
 	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
 		void PlaceWall();
@@ -67,4 +70,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, meta = (FriendlyName = "Explode"))
 	void explodeEvent();
 	void respawn();
+	void revive();
+
+	bool IsAlive();
 };

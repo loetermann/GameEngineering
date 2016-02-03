@@ -20,8 +20,7 @@ ALaserProjectile::ALaserProjectile(const FObjectInitializer& ObjectInitializer) 
 
 	OnActorBeginOverlap.AddDynamic(this, &ALaserProjectile::Hit);
 	recalled = false;
-	explodeOnDestroy = true;
-		
+	explodeOnDestroy = true;		
 }
 
 // Called when the game starts or when spawned
@@ -68,7 +67,7 @@ void ALaserProjectile::SetDirection(FVector dir) {
 
 void ALaserProjectile::Hit(AActor* OtherActor) {
 //	UE_LOG(LogTemp, Warning, TEXT("HIT %s"), *OtherActor->GetName());
-	if (HasAuthority()) {
+	if (HasAuthority() && IsValid(GetOwner())) {
 		if (GetOwner() != OtherActor) {
 			if (OtherActor->GetClass()->IsChildOf(ASGCharacter::StaticClass())) {
 				if(recalled) {
@@ -77,8 +76,8 @@ void ALaserProjectile::Hit(AActor* OtherActor) {
 				else {
 					Cast<ASGCharacter>(OtherActor)->TakeDamage(10, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
 				}
-			}
-			if (!OtherActor->GetClass()->IsChildOf(ALaserProjectile::StaticClass())) {
+				Destroy();
+			} else if (!OtherActor->GetClass()->IsChildOf(ALaserProjectile::StaticClass()) && OtherActor != Cast<ASGCharacter>(GetOwner())->CurrentWall) {
 				Destroy();
 			}
 		}

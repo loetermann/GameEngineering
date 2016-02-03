@@ -3,12 +3,13 @@
 #include "SpaceGladiator.h"
 #include "SGCharacter.h"
 #include "WallSegment.h"
+#include "UnrealNetwork.h"
 
 
 // Sets default values
 AWallSegment::AWallSegment()
 {
-	IgnoreOverlapTime = 0.0f;
+//	IgnoreOverlapTime = 0.0f;
 	bReplicates = true;
 	bAlwaysRelevant = true;
 	bReplicateMovement = true;
@@ -19,8 +20,8 @@ AWallSegment::AWallSegment()
 	RootComponent = RootScene;
 	Spline = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
 	Spline->AttachParent = RootScene;
-	Spline->SetLocationAtSplinePoint(0, FVector(0, 0, 0), ESplineCoordinateSpace::Local);
-	Spline->SetLocationAtSplinePoint(1, FVector(0, 0, 0), ESplineCoordinateSpace::Local);
+//	Spline->SetLocationAtSplinePoint(0, FVector(0, 0, 0), ESplineCoordinateSpace::Local);
+//	Spline->SetLocationAtSplinePoint(1, FVector(0, 0, 0), ESplineCoordinateSpace::Local);
 
 	WallBeams = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BeamParticles"));
 	WallBeams->AttachParent = RootScene;
@@ -39,14 +40,15 @@ AWallSegment::AWallSegment()
 		WallBeams->SetTemplate(ParticleTemplate.Object);
 	}
 
-	//static ConstructorHelpers::FObjectFinder<UStaticMesh> SplineMesh(TEXT("StaticMesh'/Engine/EngineMeshes/Cube.Cube'")); 
+
+	// static ConstructorHelpers::FObjectFinder<UStaticMesh> SplineMesh(TEXT("StaticMesh'/Engine/EngineMeshes/Cube.Cube'")); 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SplineMesh(TEXT("StaticMesh'/Game/Meshes/WallMesh.WallMesh'"));
 	if (SplineMesh.Object) {
 		this->SplineMesh = SplineMesh.Object;
 	}
 	OnActorBeginOverlap.AddDynamic(this,&AWallSegment::OnBeginOverlap);
 	this->SetActorEnableCollision(true);
-	Spline->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	Spline->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Spline->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	Spline->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 
@@ -62,9 +64,8 @@ void AWallSegment::BeginPlay()
 void AWallSegment::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
-	IgnoreOverlapTime -= DeltaTime;
-	IgnoreOverlapTime = IgnoreOverlapTime < 0 ? 0.0f : IgnoreOverlapTime;
-
+	//IgnoreOverlapTime -= DeltaTime;
+	//IgnoreOverlapTime = IgnoreOverlapTime < 0 ? 0.0f : IgnoreOverlapTime;
 }
 
 void AWallSegment::OnConstruction(const FTransform & Transform)
@@ -101,8 +102,6 @@ void AWallSegment::UpdateSplineMesh() {
 
 	//newSplineMesh->SetCollisionProfileName()
 
-
-
 	FVector pStart, tangentStart, pEnd, tangentEnd;
 	Spline->GetLocalLocationAndTangentAtSplinePoint(0, pStart, tangentStart);
 	Spline->GetLocalLocationAndTangentAtSplinePoint(1, pEnd, tangentEnd);
@@ -110,6 +109,7 @@ void AWallSegment::UpdateSplineMesh() {
 	SplineMeshComponent->SetStartAndEnd(pStart, tangentStart, pEnd, tangentEnd);
 	SplineMeshComponent->RecreateCollision();
 	RegisterAllComponents();
+
 }
 
 void AWallSegment::UpdateSplineLocation_Implementation(FVector location) {
@@ -117,29 +117,45 @@ void AWallSegment::UpdateSplineLocation_Implementation(FVector location) {
 	UpdateSplineMesh();
 }
 
-void AWallSegment::UpdateSplineStartLocation_Implementation(FVector location) {
-	Spline->SetLocationAtSplinePoint(0, location, ESplineCoordinateSpace::World);
-	UpdateSplineMesh();
-}
-
-void AWallSegment::SetBeamSource(AActor *source) {
+void AWallSegment::SetBeamSource_Implementation(AActor *source) {
 	if (IsValid(WallBeams)) {
 		WallBeams->InstanceParameters[0].Actor = source;
 	}
 }
 
-void AWallSegment::SetBeamTarget(AActor *target) {
+void AWallSegment::SetBeamTarget_Implementation(AActor *target) {
 	if (IsValid(WallBeams)) {
-		WallBeams->InstanceParameters[1].Actor = target;
-	}
-}
-void AWallSegment::OnBeginOverlap(AActor *OtherActor) {
-	if (IgnoreOverlapTime > 0.0f) {
-		return;
-	}
-	if (OtherActor->GetClass()->IsChildOf(ASGCharacter::StaticClass())) {
-		ASGCharacter *ref = (ASGCharacter*)OtherActor;
-		if (ref->CurrentWall != this) {
+		if (IsValid(target)) {
+			WallBeams->InstanceParameters[1].Actor = target;
 		}
 	}
+}
+
+void AWallSegment::NextSegmentChanged() {
+	if (IsValid(WallBeams)) {
+		if (IsValid(NextSegment)) {
+			WallBeams->InstanceParameters[1].Actor = NextSegment;
+		}
+	}
+}
+
+
+void AWallSegment::OnBeginOverlap(AActor *OtherActor) {
+	//if (IgnoreOverlapTime > 0.0f) {
+	//	return;
+	//}
+	if (OtherActor->GetClass()->IsChildOf(ASGCharacter::StaticClass())) {
+		ASGCharacter *ref = (ASGCharacter*)OtherActor;
+		if (ref->CurrentWall != this && IsValid(GetOwner())) {
+			ref->TakeDamage(100, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
+		}
+	}
+}
+
+void AWallSegment::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// Replicate to everyone
+	DOREPLIFETIME(AWallSegment, NextSegment);
 }

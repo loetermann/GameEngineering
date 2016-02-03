@@ -34,11 +34,12 @@ void ASGCharacter::Tick( float DeltaTime )
 
 	if (HasAuthority()) {
 		//UE_LOG(LogTemp, Warning, TEXT("Ticking!!!!"));
+		if (GetActorLocation().Z < 600) {
+			TakeDamage(100, FDamageEvent(), GetController(), this);
+		}
 	}
 	if (IsValid(CurrentWall)) {
-		CurrentWall->UpdateSplineLocation(GetActorLocation() - 100 * GetActorForwardVector());
-		CurrentWall->Spline->SetLocationAtSplinePoint(1, GetActorLocation() - 100 * GetActorForwardVector(), ESplineCoordinateSpace::World);
-		CurrentWall->UpdateSplineMesh();
+		CurrentWall->UpdateSplineLocation_Implementation(GetActorLocation());
 	}
 }
 
@@ -50,6 +51,9 @@ void ASGCharacter::SetupPlayerInputComponent(class UInputComponent* InputCompone
 }
 
 void ASGCharacter::Fire_Implementation(FVector direction) {
+	if (!IsAlive()) {
+		return;
+	}
 	UWorld* const World = GetWorld();
 	if (World)
 	{
@@ -70,6 +74,9 @@ bool ASGCharacter::Fire_Validate(FVector direction) {
 }
 
 void ASGCharacter::RecallProjectiles_Implementation() {
+	if (!IsAlive()) {
+		return;
+	}
 	for (TActorIterator<ALaserProjectile> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		if (ActorItr->GetOwner() == this) {
@@ -84,53 +91,54 @@ bool ASGCharacter::RecallProjectiles_Validate() {
 
 void ASGCharacter::PlaceWall_Implementation() {
 	if (CurrentWall) {
-		AWallSegment *newWallSegment = Cast<AWallSegment>(GetWorld()->SpawnActor(WallSegmentClass));
-		newWallSegment->IgnoreOverlapTime = 0.1;
-		newWallSegment->SetActorRotation(GetActorRotation());
-		newWallSegment->SetActorLocation(GetActorLocation());
-		newWallSegment->SetActorEnableCollision(true);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = Instigator;
+		AWallSegment *newWallSegment = GetWorld()->SpawnActor<AWallSegment>(WallSegmentClass, GetActorLocation(), GetActorRotation(), SpawnParams);
+//		newWallSegment->IgnoreOverlapTime = 0.1;
 		newWallSegment->PrevSegment = CurrentWall;
 		newWallSegment->WallBeams->DestroyComponent();
 		CurrentWall->NextSegment = newWallSegment;
-		CurrentWall->IgnoreOverlapTime = 0.1f;
+//		CurrentWall->IgnoreOverlapTime = 0.1f;
 		CurrentWall->SetBeamTarget(newWallSegment);
 		CurrentWall = 0;
 		return;
 	}
-	CurrentWall = Cast<AWallSegment>(GetWorld()->SpawnActor(WallSegmentClass));
-	CurrentWall->SetActorEnableCollision(true);
+	if (!IsAlive()) {
+		return;
+	}
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = Instigator;
+	CurrentWall = GetWorld()->SpawnActor<AWallSegment>(WallSegmentClass, GetActorLocation(), GetActorRotation(), SpawnParams);
 
-	CurrentWall->SetActorLocation(GetActorLocation());
-	CurrentWall->SetActorRotation(GetActorRotation());
-	CurrentWall->Spline->SetLocationAtSplinePoint(0, GetActorLocation(), ESplineCoordinateSpace::World);
-	CurrentWall->Spline->SetLocationAtSplinePoint(1, GetActorLocation(), ESplineCoordinateSpace::World);
-	CurrentWall->UpdateSplineMesh();
-	CurrentWall->UpdateSplineStartLocation(GetActorLocation());
 	CurrentWall->SetBeamTarget(this);
+	CurrentWall->SetActorEnableCollision(true);
 }
 bool ASGCharacter::PlaceWall_Validate() {
 	return true;
 }
 
 void ASGCharacter::AddWallSegment_Implementation() {
+	if (!IsAlive()) {
+		return;
+	}
 	if (!CurrentWall) {
 		return;
 	}
-	AWallSegment *newWallSegment = Cast<AWallSegment>(GetWorld()->SpawnActor(WallSegmentClass));
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = Instigator;
+	AWallSegment *newWallSegment = GetWorld()->SpawnActor<AWallSegment>(WallSegmentClass, GetActorLocation(), GetActorRotation(), SpawnParams);
 	CurrentWall->NextSegment = newWallSegment;
 	CurrentWall->SetBeamTarget(newWallSegment);
+	CurrentWall->UpdateSplineLocation(GetActorLocation());
 	CurrentWall = newWallSegment;
-	newWallSegment->SetActorRotation(GetActorRotation());
-	newWallSegment->SetActorEnableCollision(true);
+	CurrentWall->SetActorEnableCollision(true);
 	newWallSegment->PrevSegment = CurrentWall;
 	
 	newWallSegment->SetBeamSource(newWallSegment);
 	newWallSegment->SetBeamTarget(this);
-		newWallSegment->SetActorLocation(GetActorLocation());
-		newWallSegment->Spline->SetLocationAtSplinePoint(0, GetActorLocation(), ESplineCoordinateSpace::World);
-		newWallSegment->Spline->SetLocationAtSplinePoint(1, GetActorLocation(), ESplineCoordinateSpace::World);
-		newWallSegment->UpdateSplineMesh();
-		newWallSegment->UpdateSplineStartLocation(GetActorLocation());
 	
 
 }
@@ -140,12 +148,23 @@ bool ASGCharacter::AddWallSegment_Validate() {
 }
 
 float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) {
+	if (!IsAlive()) {
+		return 0;
+	}
 	// Call the base class - this will tell us how much damage to apply  
-	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser); 
 	Health -= ActualDamage;
 	if (Health <= 0) {
+		if (IsValid(GetController()) && IsValid(EventInstigator) && IsValid(DamageCauser)) {
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%s was killed by %s with %s"), *GetController()->GetName(), *EventInstigator->GetName(), *DamageCauser->GetClass()->GetName()));
+		}
+		if (CurrentWall) {
+			PlaceWall();
+		}
 		explode();
-		respawn();
+		SetActorHiddenInGame(true);
+		SetActorEnableCollision(false);
+		GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ASGCharacter::respawn, 0.75);
 	}
 	return ActualDamage;
 }
@@ -155,9 +174,21 @@ void ASGCharacter::explode_Implementation() {
 }
 
 void ASGCharacter::respawn() {
+	if (IsAlive()) {
+		return;
+	}
+	SetActorLocation(GetWorld()->GetAuthGameMode()->ChoosePlayerStart(GetController())->GetActorLocation());
+	SetActorHiddenInGame(false);
+	GetWorldTimerManager().SetTimer(ReviveTimerHandle, this, &ASGCharacter::revive, 0.75);
+}
+
+void ASGCharacter::revive() {
+	if (IsAlive()) {
+		return;
+	}
 	//GetWorld()->GetAuthGameMode()->RestartPlayer(GetController());
 	Health = 100;
-	SetActorLocation(GetWorld()->GetAuthGameMode()->ChoosePlayerStart(GetController())->GetActorLocation());
+	SetActorEnableCollision(true);
 }
 
 
@@ -168,4 +199,9 @@ void ASGCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutL
 	// Replicate to everyone
 	DOREPLIFETIME(ASGCharacter, Health);
 	DOREPLIFETIME(ASGCharacter, Color);
+	DOREPLIFETIME(ASGCharacter, CurrentWall);
+}
+
+bool ASGCharacter::IsAlive() {
+	return Health > 0;
 }

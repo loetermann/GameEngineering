@@ -31,6 +31,9 @@ void ASpaceGladiatorPlayerController::SetupInputComponent() {
 }
 
 void ASpaceGladiatorPlayerController::TurnLeft() {
+	if (!Cast<ASGCharacter>(GetPawn())->IsAlive()) {
+		return;
+	}
 	UE_LOG(LogTemp, Warning, TEXT("TurnLeft"));
 	//APawn *Pawn = GetControlledPawn();
 	//Pawn->set
@@ -45,6 +48,9 @@ void ASpaceGladiatorPlayerController::TurnLeft() {
 }
 
 void ASpaceGladiatorPlayerController::TurnRight() {
+	if (!Cast<ASGCharacter>(GetPawn())->IsAlive()) {
+		return;
+	}
 	UE_LOG(LogTemp, Warning, TEXT("TurnRight"));
 	FRotator rotation = ControlRotation;
 	rotation.Add(0, 90.0f, 0);
@@ -101,7 +107,7 @@ void ASpaceGladiatorPlayerController::RotateTargeting(FRotator Rotation)
 void ASpaceGladiatorPlayerController::PlayerTick(float DeltaTime) {
 	Super::PlayerTick(DeltaTime);
 	APawn *pawn = GetPawn();
-	if (IsValid(pawn)) {
+	if (IsValid(pawn) && Cast<ASGCharacter>(GetPawn())->IsAlive()) {
 		pawn->GetMovementComponent()->AddInputVector(pawn->GetActorForwardVector());
 	}
 }

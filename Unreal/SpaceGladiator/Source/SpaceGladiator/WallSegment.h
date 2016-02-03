@@ -27,19 +27,27 @@ public:
 
 	void OnConstruction(const FTransform &Transform) override;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, ReplicatedUsing = NextSegmentChanged)
 	AWallSegment *NextSegment;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	AWallSegment *PrevSegment;
-	
+		
 	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	//ASGCharacter *OwningCharacter;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UParticleSystemComponent *WallBeams;
 
+	UFUNCTION(NetMulticast, Reliable)
 	void SetBeamSource(AActor *source);
+	void SetBeamSource_Implementation(AActor *source);
+
+	UFUNCTION(NetMulticast, Reliable)
 	void SetBeamTarget(AActor *target);
+	void SetBeamTarget_Implementation(AActor *target);
+
+	UFUNCTION()
+	void NextSegmentChanged();
 
 	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	//UBoxComponent *CollisionBox;
@@ -57,13 +65,10 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void UpdateSplineLocation(FVector location);
 	void UpdateSplineLocation_Implementation(FVector location);
-	UFUNCTION(NetMulticast, Reliable)
-		void UpdateSplineStartLocation(FVector location);
-	void UpdateSplineStartLocation_Implementation(FVector location);
 
 	void UpdateSplineMesh();
 	UFUNCTION()
 	void OnBeginOverlap(AActor *OtherActor);
 
-	float IgnoreOverlapTime;
+//	float IgnoreOverlapTime;
 };
