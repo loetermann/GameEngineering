@@ -15,7 +15,9 @@ AWallSegment::AWallSegment()
 	bReplicateMovement = true;
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	TimeToLive = 30.0f;
+	LifeTime = 0.0f;
+	InitialWallColor = FColor(255, 255, 255, 255);
 	RootScene = CreateDefaultSubobject<USceneComponent>(TEXT("RootScene"));
 	RootComponent = RootScene;
 	Spline = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
@@ -65,9 +67,23 @@ void AWallSegment::BeginPlay()
 }
 
 // Called every frame
-void AWallSegment::Tick( float DeltaTime )
+void AWallSegment::Tick(float DeltaTime)
 {
-	Super::Tick( DeltaTime );
+	Super::Tick(DeltaTime);
+	LifeTime += DeltaTime;
+	if (LifeTime > TimeToLive && LifeTime < TimeToLive + 0.5f) {
+		//destroy Actor!
+		DestroyWall();
+	}
+	else 	if (IsValid(WallBeams)) {
+		FColor newColor = InitialWallColor;
+		newColor.R = InitialWallColor.R - LifeTime * 0.8f / TimeToLive * InitialWallColor.R;
+		newColor.G = InitialWallColor.G - LifeTime * 0.8f / TimeToLive * InitialWallColor.G;
+		newColor.B = InitialWallColor.B - LifeTime * 0.8f / TimeToLive * InitialWallColor.B;
+		newColor.A = InitialWallColor.A - LifeTime * 0.8f / TimeToLive * InitialWallColor.A;
+
+		WallBeams->InstanceParameters[2].Color = newColor;
+	}
 	//IgnoreOverlapTime -= DeltaTime;
 	//IgnoreOverlapTime = IgnoreOverlapTime < 0 ? 0.0f : IgnoreOverlapTime;
 }
@@ -111,7 +127,9 @@ void AWallSegment::UpdateSplineMesh() {
 	Spline->GetLocalLocationAndTangentAtSplinePoint(1, pEnd, tangentEnd);
 
 	SplineMeshComponent->SetStartAndEnd(pStart, tangentStart, pEnd, tangentEnd);
+#if WITH_EDITOR
 	SplineMeshComponent->RecreateCollision();
+#endif
 	RegisterAllComponents();
 
 }
@@ -165,7 +183,46 @@ void AWallSegment::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutL
 }
 
 void AWallSegment::SetBeamColor(FColor Color) {
+	/*
 	if (IsValid(WallBeams)) {
 		WallBeams->InstanceParameters[2].Color = Color;
+	}*/
+	InitialWallColor = Color;
+}
+
+void AWallSegment::DestroyWall() {
+	AWallSegment *forwardWallRef = 0;
+	//AWallSegment *backwardWallRef;
+	int counter = 0;
+	if (IsValid(NextSegment)) {
+		forwardWallRef = NextSegment;
+
+		while (IsValid(forwardWallRef->NextSegment)) {
+			forwardWallRef = forwardWallRef->NextSegment;
+			counter++;
+			if (counter > 500000) {
+				break;
+			}
+			if (IsValid(forwardWallRef->PrevSegment))
+				forwardWallRef->PrevSegment->Destroy();
+		}
+		if (IsValid(forwardWallRef))
+			forwardWallRef->Destroy();
 	}
+	if (IsValid(PrevSegment)) {
+		forwardWallRef = PrevSegment;
+		counter = 0;
+		while (IsValid(forwardWallRef->PrevSegment)) {
+			forwardWallRef = forwardWallRef->PrevSegment;
+			counter++;
+			if (counter > 500000) {
+				break; 
+			}
+			if (IsValid(forwardWallRef->NextSegment))
+				forwardWallRef->NextSegment->Destroy();
+		}
+		if (IsValid(forwardWallRef))
+			forwardWallRef->Destroy();
+	}
+	this->Destroy();
 }

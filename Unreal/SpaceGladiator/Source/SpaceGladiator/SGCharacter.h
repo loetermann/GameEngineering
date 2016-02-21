@@ -26,7 +26,7 @@ public:
 
 	/** Color, randomly set in BP */
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Player)
-		FLinearColor Color;
+	FLinearColor Color;
 
 	// Sets default values for this character's properties
 	ASGCharacter();

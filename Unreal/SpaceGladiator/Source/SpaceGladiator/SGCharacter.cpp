@@ -133,9 +133,10 @@ void ASGCharacter::AddWallSegment_Implementation() {
 	CurrentWall->NextSegment = newWallSegment;
 	CurrentWall->SetBeamTarget(newWallSegment);
 	CurrentWall->UpdateSplineLocation(GetActorLocation());
+	newWallSegment->PrevSegment = CurrentWall;
 	CurrentWall = newWallSegment;
 	CurrentWall->SetActorEnableCollision(true);
-	newWallSegment->PrevSegment = CurrentWall;
+	
 	
 	newWallSegment->SetBeamSource(newWallSegment);
 	newWallSegment->SetBeamTarget(this);
