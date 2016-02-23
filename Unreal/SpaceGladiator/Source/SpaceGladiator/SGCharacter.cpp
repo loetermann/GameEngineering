@@ -178,7 +178,7 @@ float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEv
 	Health -= ActualDamage;
 	if (Health <= 0) {
 		if (IsValid(GetController()) && IsValid(EventInstigator) && IsValid(DamageCauser)) {
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("%s was killed by %s with %s"), *GetController()->GetName(), *EventInstigator->GetName(), *DamageCauser->GetClass()->GetName()));
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, Cast<ASGCharacter>(EventInstigator->GetPawn())->Color.ToFColor(false), FString::Printf(TEXT("%s was killed by %s with %s"), *GetController()->GetName(), *EventInstigator->GetName(), *DamageCauser->GetClass()->GetName()));
 		}
 		if (CurrentWall) {
 			PlaceWall();
