@@ -37,6 +37,12 @@ void ASGCharacter::Tick( float DeltaTime )
 		if (GetActorLocation().Z < 600) {
 			TakeDamage(100, FDamageEvent(), GetController(), this);
 		}
+		if (FireLoad != 0 && FireLoad < MaxFireLoadTime) {
+			FireLoad += DeltaTime;
+			if (FireLoad > MaxFireLoadTime) {
+				FireLoad = MaxFireLoadTime;
+			}
+		}
 	}
 	if (IsValid(CurrentWall)) {
 		CurrentWall->UpdateSplineLocation_Implementation(GetActorLocation());
@@ -49,6 +55,17 @@ void ASGCharacter::SetupPlayerInputComponent(class UInputComponent* InputCompone
 	Super::SetupPlayerInputComponent(InputComponent);
 
 }
+
+void ASGCharacter::FireHold_Implementation() {
+	if (!IsAlive()) {
+		return;
+	}
+	FireLoad = 0.001;
+}
+bool ASGCharacter::FireHold_Validate() {
+	return true;
+}
+
 
 void ASGCharacter::Fire_Implementation(FVector direction) {
 	if (!IsAlive()) {
@@ -65,8 +82,9 @@ void ASGCharacter::Fire_Implementation(FVector direction) {
 		ALaserProjectile* const Projectile = World->SpawnActor<ALaserProjectile>(ProjectileClass, location, direction.Rotation(), SpawnParams);
 		if (Projectile)
 		{
-			Projectile->SetDirection(direction);
+			Projectile->SetDirection(direction, MaxProjectileSpeed*FireLoad/MaxFireLoadTime);
 		}
+		FireLoad = 0;
 	}
 }
 bool ASGCharacter::Fire_Validate(FVector direction) {
@@ -149,7 +167,7 @@ bool ASGCharacter::AddWallSegment_Validate() {
 }
 
 float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) {
-	if (!IsAlive()) {
+	if (!IsAlive() && HasAuthority()) {
 		return 0;
 	}
 	// Call the base class - this will tell us how much damage to apply  

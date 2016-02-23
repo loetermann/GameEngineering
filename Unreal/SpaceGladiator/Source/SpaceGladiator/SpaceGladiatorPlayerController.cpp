@@ -31,7 +31,8 @@ void ASpaceGladiatorPlayerController::SetupInputComponent() {
 	InputComponent->BindAxis(TEXT("Turn"), this, &ASpaceGladiatorPlayerController::Turn);
 	InputComponent->BindAxis(TEXT("Tilt"), this, &ASpaceGladiatorPlayerController::TiltCamera);
 
-	InputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &ASpaceGladiatorPlayerController::Fire);
+	InputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &ASpaceGladiatorPlayerController::FireHold);
+	InputComponent->BindAction(TEXT("Fire"), IE_Released, this, &ASpaceGladiatorPlayerController::Fire);
 	InputComponent->BindAction(TEXT("Recall"), IE_Pressed, this, &ASpaceGladiatorPlayerController::Recall);
 
 	InputComponent->BindAction(TEXT("ToggleWall"), IE_Pressed, this, &ASpaceGladiatorPlayerController::PlaceWall);
@@ -129,6 +130,10 @@ void ASpaceGladiatorPlayerController::PlayerTick(float DeltaTime) {
 	}
 }
 
+void ASpaceGladiatorPlayerController::FireHold() {
+	Cast<ASGCharacter>(GetPawn())->FireHold();
+}
+
 void ASpaceGladiatorPlayerController::Fire() {
 	ASGCharacter* Character = Cast<ASGCharacter>(GetPawn());
 	// Get the camera transform
@@ -156,5 +161,5 @@ void ASpaceGladiatorPlayerController::PlaceWall() {
 }
 
 bool ASpaceGladiatorPlayerController::IsPlacingWalls() {
-	return IsValid(Cast<ASGCharacter>(GetPawn())->CurrentWall);
+	return IsValid(GetPawn()) && (Cast<ASGCharacter>(GetPawn())->CurrentWall);
 }

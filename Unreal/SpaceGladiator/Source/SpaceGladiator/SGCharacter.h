@@ -24,9 +24,21 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Player)
 		float Health;
 
-	/** Color, randomly set in BP */
+	/** Color */
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Player)
 	FLinearColor Color;
+
+	/** FireLoad */
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Projectile)
+		float FireLoad;
+
+	/** MaxFireLoadTime */
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+		float MaxFireLoadTime;
+
+	/** MaxProjectileSpeed */
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+		float MaxProjectileSpeed;
 
 	// Sets default values for this character's properties
 	ASGCharacter();
@@ -40,6 +52,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
+	void FireHold();
+	void FireHold_Implementation();
+	bool FireHold_Validate();
 	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
 	void Fire(FVector direction);
 	void Fire_Implementation(FVector direction);
@@ -63,6 +79,7 @@ public:
 	void AddWallSegment_Implementation();
 	bool AddWallSegment_Validate();
 
+	UFUNCTION(BlueprintCallable, Category = "SpaceGladiator")
 	float TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser) override;
 	UFUNCTION(Reliable, NetMulticast)
 	void explode();

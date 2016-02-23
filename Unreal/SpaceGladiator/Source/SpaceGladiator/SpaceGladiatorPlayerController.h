@@ -25,6 +25,7 @@ public:
 	void Turn(float Value);
 	void TiltCamera(float Value);
 	void PlayerTick(float DeltaTime);
+	void FireHold();
 	void Fire();
 	void Recall();
 	void PlaceWall();

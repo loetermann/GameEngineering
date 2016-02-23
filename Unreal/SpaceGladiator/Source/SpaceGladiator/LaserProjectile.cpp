@@ -57,11 +57,11 @@ void ALaserProjectile::Tick( float DeltaTime )
 	}
 }
 
-void ALaserProjectile::SetDirection(FVector dir) {
+void ALaserProjectile::SetDirection(FVector dir, float speed) {
 	direction = dir;
 	direction[2] = 0;
 	direction.Normalize();
-	direction *= 4000;
+	direction *= speed;
 	SetActorRotation(FRotator(90, 0, 0) + direction.Rotation());
 }
 

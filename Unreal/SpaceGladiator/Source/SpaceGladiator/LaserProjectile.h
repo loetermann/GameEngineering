@@ -32,7 +32,7 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	void SetDirection(FVector dir);
+	void SetDirection(FVector dir, float speed);
 
 	UFUNCTION()
 	void Hit(AActor* OtherActor);
