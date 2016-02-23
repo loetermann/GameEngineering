@@ -116,6 +116,7 @@ void ASGCharacter::PlaceWall_Implementation() {
 //		newWallSegment->IgnoreOverlapTime = 0.1;
 		newWallSegment->PrevSegment = CurrentWall;
 		newWallSegment->WallBeams->DestroyComponent();
+		newWallSegment->SetBeamColor(FColor(Color.R, Color.G, Color.B, Color.A));
 		CurrentWall->NextSegment = newWallSegment;
 //		CurrentWall->IgnoreOverlapTime = 0.1f;
 		CurrentWall->SetBeamTarget(newWallSegment);
@@ -132,6 +133,7 @@ void ASGCharacter::PlaceWall_Implementation() {
 
 	CurrentWall->SetBeamTarget(this);
 	CurrentWall->SetActorEnableCollision(true);
+	CurrentWall->SetBeamColor(FColor(Color.R,Color.G,Color.B,Color.A));
 }
 bool ASGCharacter::PlaceWall_Validate() {
 	return true;
@@ -152,6 +154,7 @@ void ASGCharacter::AddWallSegment_Implementation() {
 	CurrentWall->SetBeamTarget(newWallSegment);
 	CurrentWall->UpdateSplineLocation(GetActorLocation());
 	newWallSegment->PrevSegment = CurrentWall;
+	newWallSegment->SetBeamColor(FColor(Color.R, Color.G, Color.B, Color.A));
 	CurrentWall = newWallSegment;
 	CurrentWall->SetActorEnableCollision(true);
 	
