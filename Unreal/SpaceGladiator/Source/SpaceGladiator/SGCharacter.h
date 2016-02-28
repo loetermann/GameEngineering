@@ -84,7 +84,7 @@ public:
 	UFUNCTION(Reliable, NetMulticast)
 	void explode();
 	void explode_Implementation();
-	UFUNCTION(BlueprintImplementableEvent, meta = (FriendlyName = "Explode"))
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Explode"))
 	void explodeEvent();
 	void respawn();
 	void revive();
