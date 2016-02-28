@@ -4,6 +4,7 @@
 
 #include <vector>
 #include "GameFramework/GameMode.h"
+#include "SGHUD.h"
 #include "SpaceGladiatorGameMode.generated.h"
 /**
  * 

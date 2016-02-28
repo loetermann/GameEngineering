@@ -12,6 +12,7 @@
 
 ASpaceGladiatorGameMode::ASpaceGladiatorGameMode(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer) {
 	PlayerControllerClass = ASpaceGladiatorPlayerController::StaticClass();
+	HUDClass = ASGHUD::StaticClass();
 
 	static ConstructorHelpers::FObjectFinder<UBlueprint> Character(TEXT("Blueprint'/Game/Player/SpaceGladiatorCharacter.SpaceGladiatorCharacter'"));
 	if (Character.Object) {
