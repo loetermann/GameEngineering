@@ -17,7 +17,25 @@ ASGCharacter::ASGCharacter()
 	WallSegmentClass = AWallSegment::StaticClass();
 	bReplicates = true;
 
+	RacerComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Racer"));
+	RacerComponent->RegisterComponent();
+	RacerComponent->AttachTo(RootComponent);
+
+	CanonComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Canon"));
+	CanonComponent->RegisterComponent();
+	CanonComponent->AttachTo(RootComponent);
+
+	InitComponents();
 }
+
+void ASGCharacter::InitComponents() {
+	if (RacerMesh) { RacerComponent->SetStaticMesh(RacerMesh); } 
+	if (CanonMesh) { CanonComponent->SetStaticMesh(CanonMesh); }
+	if (RacerMaterial) { RacerComponent->SetMaterial(0, RacerMaterial); }
+	if (CanonMaterial) { CanonComponent->SetMaterial(0, CanonMaterial); }
+ }
+
+void ASGCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) { Super::PostEditChangeProperty(PropertyChangedEvent); InitComponents(); }
 
 // Called when the game starts or when spawned
 void ASGCharacter::BeginPlay()
@@ -66,8 +84,14 @@ bool ASGCharacter::FireHold_Validate() {
 	return true;
 }
 
+inline bool IsCloseTo(float Rotation, float Degrees) {
+	float Deviation = 3.0f;
+	bool Result = ((Degrees - Deviation) < Rotation) && (Rotation < (Degrees + Deviation));
 
-void ASGCharacter::Fire_Implementation(FVector direction) {
+	return Result;
+}
+
+void ASGCharacter::Fire_Implementation(FVector bulletDirection) {
 	if (!IsAlive()) {
 		return;
 	}
@@ -78,16 +102,29 @@ void ASGCharacter::Fire_Implementation(FVector direction) {
 		SpawnParams.Owner = this;
 		SpawnParams.Instigator = Instigator;
 		FVector location = GetActorLocation();
+
 		location.Z = location.Z - 20;
-		ALaserProjectile* const Projectile = World->SpawnActor<ALaserProjectile>(ProjectileClass, location, direction.Rotation(), SpawnParams);
+
+		// Adjust for Canon offset so that Projectiles seem to be launched from there
+		float CanonOffset = 50.0f;
+
+		FRotator rotation = GetActorRotation();
+
+		if (IsCloseTo(rotation.Yaw, 0.0f)) { location.X -= CanonOffset; }
+		else if (IsCloseTo(rotation.Yaw, 90.0f)) { location.Y -= CanonOffset; }
+		else if (IsCloseTo(rotation.Yaw, -180.0f)) { location.X += CanonOffset; }
+		else if (IsCloseTo(rotation.Yaw, -90.0f)) { location.Y += CanonOffset; }
+
+		ALaserProjectile* const Projectile = World->SpawnActor<ALaserProjectile>(ProjectileClass, location, bulletDirection.Rotation(), SpawnParams);
 		if (Projectile)
 		{
-			Projectile->SetDirection(direction, MaxProjectileSpeed*FireLoad/MaxFireLoadTime);
+			Projectile->SetDirection(bulletDirection, MaxProjectileSpeed*FireLoad/MaxFireLoadTime);
 		}
 		FireLoad = 0;
 	}
 }
-bool ASGCharacter::Fire_Validate(FVector direction) {
+
+bool ASGCharacter::Fire_Validate(FVector bulletDirection) {
 	return true;
 }
 

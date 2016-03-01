@@ -40,6 +40,22 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 		float MaxProjectileSpeed;
 
+	/** Canon */
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Components")
+	UStaticMeshComponent* CanonComponent;
+	UPROPERTY(AdvancedDisplay, Replicated, EditAnywhere, BlueprintReadWrite, Category = "Meshes")
+	UStaticMesh* CanonMesh;
+	UPROPERTY(AdvancedDisplay, Replicated, EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	UMaterialInterface* CanonMaterial;
+
+	/** Racer */
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Components")
+	UStaticMeshComponent* RacerComponent;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Meshes")
+	UStaticMesh* RacerMesh;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	UMaterialInterface* RacerMaterial;
+
 	// Sets default values for this character's properties
 	ASGCharacter();
 
@@ -57,9 +73,9 @@ public:
 	void FireHold_Implementation();
 	bool FireHold_Validate();
 	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
-	void Fire(FVector direction);
-	void Fire_Implementation(FVector direction);
-	bool Fire_Validate(FVector direction);
+	void Fire(FVector bulletDirection);
+	void Fire_Implementation(FVector bulletDirection);
+	bool Fire_Validate(FVector bulletDirection);
 
 	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
 	void RecallProjectiles();
@@ -90,4 +106,10 @@ public:
 	void revive();
 
 	bool IsAlive();
+
+
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
+private:
+	void InitComponents();
 };

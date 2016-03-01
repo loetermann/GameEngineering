@@ -14,6 +14,7 @@ ASpaceGladiatorPlayerController::ASpaceGladiatorPlayerController(const FObjectIn
 }
 
 void ASpaceGladiatorPlayerController::BeginPlayingState() {
+	/*
 	APawn *pawn = GetPawn();
 	if (IsValid(pawn)) {
 		UStaticMeshComponent* targeting = (UStaticMeshComponent*)pawn->FindComponentByClass(UStaticMeshComponent::StaticClass());
@@ -21,6 +22,7 @@ void ASpaceGladiatorPlayerController::BeginPlayingState() {
 			targeting->SetHiddenInGame(false);
 		}
 	}
+	*/
 }
 
 void ASpaceGladiatorPlayerController::SetupInputComponent() {
@@ -99,13 +101,14 @@ void ASpaceGladiatorPlayerController::RotateCamera(FRotator Rotation) {
 	}
 }
 
-void ASpaceGladiatorPlayerController::RotateTargeting(FRotator Rotation)
-{
-	APawn *pawn = GetPawn();
+void ASpaceGladiatorPlayerController::RotateTargeting(FRotator Rotation) {
+	APawn* pawn = GetPawn();
+	ASGCharacter* character = Cast<ASGCharacter>(GetPawn());
+
 	if (IsValid(pawn)) {
-		UStaticMeshComponent* targeting = (UStaticMeshComponent*)pawn->FindComponentByClass(UStaticMeshComponent::StaticClass());
-		if (IsValid(targeting)) {
-			targeting->AddRelativeRotation(Rotation);
+		UStaticMeshComponent* canon = character->CanonComponent;  // UStaticMeshComponent* targeting = (UStaticMeshComponent*)pawn->FindComponentByClass(UStaticMeshComponent::StaticClass());
+		if (IsValid(canon)) {
+			canon->AddRelativeRotation({0.0f, Rotation.Yaw, 0.0f});
 		}
 	}
 }
