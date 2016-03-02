@@ -214,8 +214,14 @@ float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEv
 	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser); 
 	Health -= ActualDamage;
 	if (Health <= 0) {
-		if (IsValid(GetController()) && IsValid(EventInstigator) && IsValid(DamageCauser)) {
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, Cast<ASGCharacter>(EventInstigator->GetPawn())->Color.ToFColor(false), FString::Printf(TEXT("%s was killed by %s with %s"), *GetController()->GetName(), *EventInstigator->GetName(), *DamageCauser->GetClass()->GetName()));
+		if (IsValid(GetController()) && IsValid(EventInstigator) && IsValid(DamageCauser) && IsValid(EventInstigator->GetPawn()->PlayerState) && IsValid(PlayerState)) {
+			if (EventInstigator->GetPawn() == this) {
+				EventInstigator->GetPawn()->PlayerState->Score--;
+			}
+			else {
+				EventInstigator->GetPawn()->PlayerState->Score++;
+			}
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, Cast<ASGCharacter>(EventInstigator->GetPawn())->Color.ToFColor(false), FString::Printf(TEXT("%s was killed by %s with %s"), *PlayerState->PlayerName, *EventInstigator->GetPawn()->PlayerState->PlayerName, *DamageCauser->GetClass()->GetName()));
 		}
 		if (CurrentWall) {
 			PlaceWall();

@@ -34,7 +34,7 @@ void ASGHUD::DrawHUD() {
 			FVector2D ScreenPosition;
 			bool IsOnScreen = UGameplayStatics::ProjectWorldToScreen(GetOwningPlayerController(), Position, ScreenPosition);
 			if (IsOnScreen && castedPawn != ownedPawn) {
-				DrawText(ownedPawn->GetName(), FLinearColor(1, 1, 1, 0.25f), ScreenPosition.X, ScreenPosition.Y);
+				DrawText(castedPawn->GetName(), FLinearColor(1, 1, 1, 0.25f), ScreenPosition.X, ScreenPosition.Y);
 				//Background of Health-Bar
 				DrawRect(FLinearColor(0.74f, 0.74f, 0.74f, 0.25f), ScreenPosition.X + HEALTH_BAR_X_OFFSET, ScreenPosition.Y + HEALTH_BAR_Y_OFFSET, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT);
 				//Fill Health Bar
