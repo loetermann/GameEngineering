@@ -71,10 +71,10 @@ void ALaserProjectile::Hit(AActor* OtherActor) {
 		if (GetOwner() != OtherActor) {
 			if (OtherActor->GetClass()->IsChildOf(ASGCharacter::StaticClass())) {
 				if(recalled) {
-					Cast<ASGCharacter>(OtherActor)->TakeDamage(80, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
+					Cast<ASGCharacter>(OtherActor)->TakeDamage(75, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
 				}
 				else {
-					Cast<ASGCharacter>(OtherActor)->TakeDamage(10, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
+					Cast<ASGCharacter>(OtherActor)->TakeDamage(25, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
 				}
 				Destroy();
 			} else if (!OtherActor->GetClass()->IsChildOf(ALaserProjectile::StaticClass()) && OtherActor != Cast<ASGCharacter>(GetOwner())->CurrentWall) {

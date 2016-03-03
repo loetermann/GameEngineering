@@ -8,10 +8,6 @@
 #include "SpaceGladiatorGameMode.h"
 
 ASpaceGladiatorPlayerController::ASpaceGladiatorPlayerController(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer) {
-	WallMaxTime = 10.0f;
-	CurrentWallTime = 0.0f;
-	WallCooldown = 5.0f;
-	CurrentWallCooldown = 0.0f;
 }
 
 void ASpaceGladiatorPlayerController::BeginPlayingState() {
@@ -125,16 +121,6 @@ void ASpaceGladiatorPlayerController::PlayerTick(float DeltaTime) {
 	if (IsValid(pawn) && Cast<ASGCharacter>(GetPawn())->IsAlive()) {
 		pawn->GetMovementComponent()->AddInputVector(pawn->GetActorForwardVector());
 	}
-	if (IsPlacingWalls()) {
-		CurrentWallTime += DeltaTime;
-		if (CurrentWallTime > WallMaxTime) {
-			PlaceWall();
-		}
-	}
-	CurrentWallCooldown -= DeltaTime;
-	if (CurrentWallCooldown < 0.0f) {
-		CurrentWallCooldown = 0.0f;
-	}
 }
 
 void ASpaceGladiatorPlayerController::FireHold() {
@@ -157,14 +143,7 @@ void ASpaceGladiatorPlayerController::Recall() {
 }
 
 void ASpaceGladiatorPlayerController::PlaceWall() {
-	if (CurrentWallCooldown) {
-		return;
-	}
 	Cast<ASGCharacter>(GetPawn())->PlaceWall();
-	if (!IsPlacingWalls()) {
-		CurrentWallTime = 0.0f;
-		CurrentWallCooldown = WallCooldown;
-	}
 }
 
 bool ASpaceGladiatorPlayerController::IsPlacingWalls() {

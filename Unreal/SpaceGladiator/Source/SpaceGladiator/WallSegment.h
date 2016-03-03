@@ -77,7 +77,7 @@ public:
 	float TimeToLive;
 	UPROPERTY(EditAnyWhere, Category = "Space Gladiator|Walls")
 	float LifeTime;
-	UPROPERTY(EditAnyWhere, Category = "Space Gladiator|Walls")
+	UPROPERTY(Replicated, EditAnyWhere, Category = "Space Gladiator|Walls")
 	FColor InitialWallColor;
 	UFUNCTION(BlueprintCallable, Category = "Space Gladiator|Walls")
 	void DestroyWall();

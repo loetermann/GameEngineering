@@ -31,9 +31,4 @@ public:
 	void PlaceWall();
 	bool IsPlacingWalls();
 
-	float WallMaxTime;
-	float CurrentWallTime;
-	float WallCooldown;
-protected:
-	float CurrentWallCooldown;
 };

@@ -180,6 +180,7 @@ void AWallSegment::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutL
 
 	// Replicate to everyone
 	DOREPLIFETIME(AWallSegment, NextSegment);
+	DOREPLIFETIME(AWallSegment, InitialWallColor);
 }
 
 void AWallSegment::SetBeamColor(FColor Color) {

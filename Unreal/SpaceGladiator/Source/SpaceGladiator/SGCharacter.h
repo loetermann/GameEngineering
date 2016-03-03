@@ -25,7 +25,7 @@ public:
 		float Health;
 
 	/** Color */
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Player)
+	UPROPERTY(ReplicatedUsing = ColorChanged, EditAnywhere, BlueprintReadWrite, Category = Player)
 	FLinearColor Color;
 
 	/** FireLoad */
@@ -107,8 +107,16 @@ public:
 
 	bool IsAlive();
 
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "ColorChanged"))
+		void colorChanged();
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
+
+	float WallMaxTime;
+	float CurrentWallTime;
+	float WallCooldown;
+	float CurrentWallCooldown;
 
 private:
 	void InitComponents();

@@ -10,6 +10,12 @@
 // Sets default values
 ASGCharacter::ASGCharacter()
 {
+
+	WallMaxTime = 10.0f;
+	CurrentWallTime = 0.0f;
+	WallCooldown = 5.0f;
+	CurrentWallCooldown = 0.0f;
+
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -22,10 +28,27 @@ ASGCharacter::ASGCharacter()
 	RacerComponent->RegisterComponent();
 	RacerComponent->AttachTo(RootComponent);
 
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> RacerFinder(TEXT("StaticMesh'/Game/Meshes/Racer.Racer'"));
+
+	if (RacerFinder.Object) {
+		RacerComponent->StaticMesh = RacerFinder.Object;
+		RacerMesh = RacerFinder.Object;
+	}
+	RacerComponent->SetRelativeScale3D(FVector(20.0f, 20.0f, 20.0f));
+	RacerComponent->SetRelativeRotation(FRotator(0, -90.0f, 0));
 	CanonComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Canon"));
 	CanonComponent->RegisterComponent();
 	CanonComponent->AttachTo(RootComponent);
+	
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> CanonFinder(TEXT("StaticMesh'/Game/Meshes/Canon.Canon'"));
 
+	if (CanonFinder.Object) {
+		CanonComponent->StaticMesh = CanonFinder.Object;
+		CanonMesh = CanonFinder.Object;
+	}
+	CanonComponent->SetRelativeRotation(FRotator(0, -90.0f, 0));
+	CanonComponent->SetRelativeScale3D(FVector(20.0f, 20.0f, 20.0f));
+	CanonComponent->SetRelativeLocation(FVector(-10.0f, -0.0f, 47.0f));
 	InitComponents();
 }
 
@@ -64,6 +87,14 @@ void ASGCharacter::Tick( float DeltaTime )
 	}
 	if (IsValid(CurrentWall)) {
 		CurrentWall->UpdateSplineLocation_Implementation(GetActorLocation());
+		CurrentWallTime += DeltaTime;
+		if (CurrentWallTime > WallMaxTime) {
+			PlaceWall();
+		}
+	}
+	CurrentWallCooldown -= DeltaTime;
+	if (CurrentWallCooldown < 0.0f) {
+		CurrentWallCooldown = 0.0f;
 	}
 }
 
@@ -160,7 +191,7 @@ void ASGCharacter::PlaceWall_Implementation() {
 		CurrentWall = 0;
 		return;
 	}
-	if (!IsAlive()) {
+	if (!IsAlive() || CurrentWallCooldown) {
 		return;
 	}
 	FActorSpawnParameters SpawnParams;
@@ -171,6 +202,9 @@ void ASGCharacter::PlaceWall_Implementation() {
 	CurrentWall->SetBeamTarget(this);
 	CurrentWall->SetActorEnableCollision(true);
 	CurrentWall->SetBeamColor(FColor(Color.R,Color.G,Color.B,Color.A));
+
+	CurrentWallTime = 0.0f;
+	CurrentWallCooldown = WallCooldown;
 }
 bool ASGCharacter::PlaceWall_Validate() {
 	return true;
