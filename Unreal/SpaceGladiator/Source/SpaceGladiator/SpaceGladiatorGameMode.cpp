@@ -26,12 +26,12 @@ ASpaceGladiatorGameMode::ASpaceGladiatorGameMode(const FObjectInitializer &Objec
 	colors.push_back(*(new FLinearColor(0, 255, 0))); //green
 	colors.push_back(*(new FLinearColor(0, 0, 255))); // blue
 	colors.push_back(*(new FLinearColor(0, 255, 255))); //cyan
-	colors.push_back(*(new FLinearColor(100, 0, 255))); // purple
+	//colors.push_back(*(new FLinearColor(100, 0, 255))); // purple too similar to magenta
 	//colors.push_back(*(new FLinearColor(0, 100, 255))); //light blue - possibly to similar to normal blue
 	//colors.push_back(*(new FLinearColor(255, 100, 0))); // orange - too similar to yellow
 	//colors.push_back(*(new FLinearColor(255, 0, 100))); // pinkish - too similar to purple/maganta
 	//colors.push_back(*(new FLinearColor(100, 255, 0))); //light green - too similar to normal green
-	//colors.push_back(*(new FLinearColor(0, 255, 100))); too similar to normal green
+	//colors.push_back(*(new FLinearColor(0, 255, 100))); // too similar to normal green
 
 	
 	auto engine = std::default_random_engine{};

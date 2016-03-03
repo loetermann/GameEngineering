@@ -15,6 +15,7 @@ public:
 
 	FTimerHandle RespawnTimerHandle;
 	FTimerHandle ReviveTimerHandle;
+	FTimerHandle PunishTimerHandle;
 	
 	/** Projectile class to spawn */
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
@@ -104,7 +105,9 @@ public:
 	void explodeEvent();
 	void respawn();
 	void revive();
+	void punish();
 
+	UFUNCTION(BlueprintCallable, Category = "SpaceGladiator")
 	bool IsAlive();
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "ColorChanged"))
@@ -120,4 +123,6 @@ public:
 
 private:
 	void InitComponents();
+	UFUNCTION(BlueprintCallable, Category = "SpaceGladiator")
+	bool IsInvincible();
 };

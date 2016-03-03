@@ -106,7 +106,7 @@ void ASGCharacter::SetupPlayerInputComponent(class UInputComponent* InputCompone
 }
 
 void ASGCharacter::FireHold_Implementation() {
-	if (!IsAlive()) {
+	if (!IsAlive() || IsInvincible()) {
 		return;
 	}
 	FireLoad = 0.001;
@@ -123,7 +123,7 @@ inline bool IsCloseTo(float Rotation, float Degrees) {
 }
 
 void ASGCharacter::Fire_Implementation(FVector bulletDirection) {
-	if (!IsAlive()) {
+	if (!IsAlive() || IsInvincible()) {
 		return;
 	}
 	UWorld* const World = GetWorld();
@@ -160,7 +160,7 @@ bool ASGCharacter::Fire_Validate(FVector bulletDirection) {
 }
 
 void ASGCharacter::RecallProjectiles_Implementation() {
-	if (!IsAlive()) {
+	if (!IsAlive() || IsInvincible()) {
 		return;
 	}
 	for (TActorIterator<ALaserProjectile> ActorItr(GetWorld()); ActorItr; ++ActorItr)
@@ -191,7 +191,7 @@ void ASGCharacter::PlaceWall_Implementation() {
 		CurrentWall = 0;
 		return;
 	}
-	if (!IsAlive() || CurrentWallCooldown) {
+	if (!IsAlive() || IsInvincible() || CurrentWallCooldown) {
 		return;
 	}
 	FActorSpawnParameters SpawnParams;
@@ -211,7 +211,7 @@ bool ASGCharacter::PlaceWall_Validate() {
 }
 
 void ASGCharacter::AddWallSegment_Implementation() {
-	if (!IsAlive()) {
+	if (!IsAlive() || IsInvincible()) {
 		return;
 	}
 	if (!CurrentWall) {
@@ -241,6 +241,9 @@ bool ASGCharacter::AddWallSegment_Validate() {
 }
 
 float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) {
+	if (IsInvincible()&&DamageCauser!=this) {
+		return 0;
+	}
 	if (!IsAlive() && HasAuthority()) {
 		return 0;
 	}
@@ -248,7 +251,8 @@ float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEv
 	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser); 
 	Health -= ActualDamage;
 	if (Health <= 0) {
-		if (IsValid(GetController()) && IsValid(EventInstigator) && IsValid(DamageCauser) && IsValid(EventInstigator->GetPawn()->PlayerState) && IsValid(PlayerState)) {
+
+		if (IsValid(GetController()) && IsValid(EventInstigator) && IsValid(DamageCauser)&& IsValid(EventInstigator->GetPawn()->PlayerState) && IsValid(PlayerState)) {
 			if (EventInstigator->GetPawn() == this) {
 				EventInstigator->GetPawn()->PlayerState->Score--;
 			}
@@ -257,7 +261,18 @@ float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEv
 				EventInstigator->GetPawn()->PlayerState->Score++;
 			}
 			Cast<ASGPlayerState>(PlayerState)->Deaths++;
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, Cast<ASGCharacter>(EventInstigator->GetPawn())->Color.ToFColor(false), FString::Printf(TEXT("%s was killed by %s with %s"), *PlayerState->PlayerName, *EventInstigator->GetPawn()->PlayerState->PlayerName, *DamageCauser->GetClass()->GetName()));
+			
+			
+			FString message;
+			if (EventInstigator== GetController()) {
+				message = FString::Printf(TEXT("%s committed suicide"), *PlayerState->PlayerName);
+			}
+			else {
+				message = FString::Printf(TEXT("%s killed %s with %s"),  *EventInstigator->GetPawn()->PlayerState->PlayerName, *PlayerState->PlayerName, *DamageCauser->GetClass()->GetName());
+			}
+
+
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, Cast<ASGCharacter>(EventInstigator->GetPawn())->Color.ToFColor(false), message);
 		}
 		if (CurrentWall) {
 			PlaceWall();
@@ -278,8 +293,13 @@ void ASGCharacter::respawn() {
 	if (IsAlive()) {
 		return;
 	}
-	SetActorLocation(GetWorld()->GetAuthGameMode()->ChoosePlayerStart(GetController())->GetActorLocation());
+	AActor* spawnPoint = GetWorld()->GetAuthGameMode()->ChoosePlayerStart(GetController());
+	SetActorRotation(spawnPoint->GetActorForwardVector().Rotation()); //FOR AI
+	GetController()->SetControlRotation(spawnPoint->GetActorForwardVector().Rotation()); //FOR PLAYER
+	SetActorLocation(spawnPoint->GetActorLocation());
+	SetActorEnableCollision(true);
 	SetActorHiddenInGame(false);
+	
 	GetWorldTimerManager().SetTimer(ReviveTimerHandle, this, &ASGCharacter::revive, 0.75);
 }
 
@@ -290,6 +310,20 @@ void ASGCharacter::revive() {
 	//GetWorld()->GetAuthGameMode()->RestartPlayer(GetController());
 	Health = 100;
 	SetActorEnableCollision(true);
+
+	GetWorldTimerManager().SetTimer(PunishTimerHandle, this, &ASGCharacter::punish, 12.5);
+}
+
+void ASGCharacter::punish() {
+	if (IsInvincible()) {
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, Color.ToFColor(false), "YOU GOT PUNISHED");
+		TakeDamage(100,FDamageEvent(),GetController(),this);
+		
+	}
+	else{
+//		GEngine->AddOnScreenDebugMessage(-1, 15.0f, Color.ToFColor(false), "you avoided punishment");
+
+	}
 }
 
 
@@ -307,4 +341,9 @@ void ASGCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutL
 
 bool ASGCharacter::IsAlive() {
 	return Health > 0;
+}
+
+bool ASGCharacter::IsInvincible() {
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, Color.ToFColor(false), FString::Printf(TEXT("Z: %f: %s"), Super::GetActorLocation().Z, *FString((Super::GetActorLocation().Z > 715) ? "true": "false")));
+	return Super::GetActorLocation().Z > 715;
 }
