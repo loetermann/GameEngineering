@@ -5,6 +5,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "SpaceGladiatorPlayerController.h"
 #include "SGCharacter.h"
+#include "SpaceGladiatorGameMode.h"
 
 ASpaceGladiatorPlayerController::ASpaceGladiatorPlayerController(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer) {
 	WallMaxTime = 10.0f;
@@ -14,6 +15,9 @@ ASpaceGladiatorPlayerController::ASpaceGladiatorPlayerController(const FObjectIn
 }
 
 void ASpaceGladiatorPlayerController::BeginPlayingState() {
+	if (HasAuthority()) {
+		PlayerState->SetPlayerName(FString::Printf(TEXT("Player %d"), Cast<ASpaceGladiatorGameMode>(GetWorld()->GetAuthGameMode())->nextID()));
+	}
 	/*
 	APawn *pawn = GetPawn();
 	if (IsValid(pawn)) {

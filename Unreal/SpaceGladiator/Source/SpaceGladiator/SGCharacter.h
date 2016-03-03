@@ -33,7 +33,7 @@ public:
 		float FireLoad;
 
 	/** MaxFireLoadTime */
-	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Projectile)
 		float MaxFireLoadTime;
 
 	/** MaxProjectileSpeed */

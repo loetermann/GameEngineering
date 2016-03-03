@@ -17,10 +17,14 @@ class SPACEGLADIATOR_API ASpaceGladiatorGameMode : public AGameMode
 
 	std::vector<FLinearColor> colors;
 
+	int32 id;
+
 public:
 	ASpaceGladiatorGameMode(const FObjectInitializer &ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable, Category = "SpaceGladiatorGameMode")
 	FLinearColor getColor();
-	
+
+	UFUNCTION(BlueprintCallable, Category = "SpaceGladiatorGameMode")
+		int32 nextID();
 };

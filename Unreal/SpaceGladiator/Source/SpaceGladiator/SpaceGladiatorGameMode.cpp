@@ -37,6 +37,8 @@ ASpaceGladiatorGameMode::ASpaceGladiatorGameMode(const FObjectInitializer &Objec
 	auto engine = std::default_random_engine{};
 	std::shuffle(std::begin(colors), std::end(colors), engine);
 
+	id = 0;
+
 }
 
 FLinearColor ASpaceGladiatorGameMode::getColor()
@@ -47,5 +49,9 @@ FLinearColor ASpaceGladiatorGameMode::getColor()
 	FLinearColor color = colors[r];
 	colors.erase(colors.begin()+r);
 	return color;
+}
+
+int32 ASpaceGladiatorGameMode::nextID() {
+	return id++;
 }
 

@@ -2,6 +2,8 @@
 
 #include "SpaceGladiator.h"
 #include "SGAIController.h"
+#include "SGPlayerState.h"
+#include "SpaceGladiatorGameMode.h"
 
 ASGAIController::ASGAIController(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer) {
 
@@ -11,5 +13,7 @@ ASGAIController::ASGAIController(const FObjectInitializer &ObjectInitializer) : 
 
 void ASGAIController::BeginPlay() {
 	Super::BeginPlay();
-	PlayerState->SetPlayerName(GetName());
+	if (HasAuthority()) {
+		PlayerState->SetPlayerName(FString::Printf(TEXT("AI %d"), Cast<ASpaceGladiatorGameMode>(GetWorld()->GetAuthGameMode())->nextID()));
+	}
 }

@@ -3,6 +3,7 @@
 #include "SpaceGladiator.h"
 #include "SGCharacter.h"
 #include "LaserProjectile.h"
+#include "SGPlayerState.h"
 #include "UnrealNetwork.h"
 
 
@@ -42,7 +43,6 @@ void ASGCharacter::BeginPlay()
 {
 	Health = 100;
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -219,8 +219,10 @@ float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEv
 				EventInstigator->GetPawn()->PlayerState->Score--;
 			}
 			else {
+				Cast<ASGPlayerState>(EventInstigator->GetPawn()->PlayerState)->Kills++;
 				EventInstigator->GetPawn()->PlayerState->Score++;
 			}
+			Cast<ASGPlayerState>(PlayerState)->Deaths++;
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, Cast<ASGCharacter>(EventInstigator->GetPawn())->Color.ToFColor(false), FString::Printf(TEXT("%s was killed by %s with %s"), *PlayerState->PlayerName, *EventInstigator->GetPawn()->PlayerState->PlayerName, *DamageCauser->GetClass()->GetName()));
 		}
 		if (CurrentWall) {
@@ -264,6 +266,8 @@ void ASGCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutL
 	// Replicate to everyone
 	DOREPLIFETIME(ASGCharacter, Health);
 	DOREPLIFETIME(ASGCharacter, Color);
+	DOREPLIFETIME(ASGCharacter, FireLoad);
+	DOREPLIFETIME(ASGCharacter, MaxFireLoadTime);
 	DOREPLIFETIME(ASGCharacter, CurrentWall);
 }
 
