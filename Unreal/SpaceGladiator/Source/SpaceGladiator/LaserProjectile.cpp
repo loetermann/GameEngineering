@@ -3,6 +3,7 @@
 #include "SpaceGladiator.h"
 #include "LaserProjectile.h"
 #include "SGCharacter.h"
+#include "UnrealNetwork.h"
 
 
 // Sets default values
@@ -19,8 +20,7 @@ ALaserProjectile::ALaserProjectile(const FObjectInitializer& ObjectInitializer) 
 
 	OnActorBeginOverlap.AddDynamic(this, &ALaserProjectile::Hit);
 	recalled = false;
-	explodeOnDestroy = true;
-		
+	explodeOnDestroy = true;		
 }
 
 // Called when the game starts or when spawned
@@ -38,7 +38,7 @@ void ALaserProjectile::Tick( float DeltaTime )
 	if (recalled) {
 		direction = (GetOwner()->GetActorLocation() - GetActorLocation());
 		if (direction.Size() < 4000*DeltaTime) {
-			explodeOnDestroy = false;
+			NoExplosion();
 			Destroy();
 		}
 		direction.Normalize();
@@ -52,26 +52,32 @@ void ALaserProjectile::Tick( float DeltaTime )
 	}
 	if (!SetActorLocation(GetActorLocation() + (direction*DeltaTime), true)) {
 		if (HasAuthority()) {
-			Destroy();
+			 Destroy();
 		}
 	}
 }
 
-void ALaserProjectile::SetDirection(FVector dir) {
+void ALaserProjectile::SetDirection(FVector dir, float speed) {
 	direction = dir;
 	direction[2] = 0;
 	direction.Normalize();
-	direction *= 4000;
+	direction *= speed;
 	SetActorRotation(FRotator(90, 0, 0) + direction.Rotation());
 }
 
 void ALaserProjectile::Hit(AActor* OtherActor) {
 //	UE_LOG(LogTemp, Warning, TEXT("HIT %s"), *OtherActor->GetName());
-	if (HasAuthority()) {
+	if (HasAuthority() && IsValid(GetOwner())) {
 		if (GetOwner() != OtherActor) {
-			if (OtherActor->GetClass()->IsChildOf(ACharacter::StaticClass())) {
-			}
-			if (!OtherActor->GetClass()->IsChildOf(ALaserProjectile::StaticClass())) {
+			if (OtherActor->GetClass()->IsChildOf(ASGCharacter::StaticClass())) {
+				if(recalled) {
+					Cast<ASGCharacter>(OtherActor)->TakeDamage(75, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
+				}
+				else {
+					Cast<ASGCharacter>(OtherActor)->TakeDamage(25, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
+				}
+				Destroy();
+			} else if (!OtherActor->GetClass()->IsChildOf(ALaserProjectile::StaticClass()) && OtherActor != Cast<ASGCharacter>(GetOwner())->CurrentWall) {
 				Destroy();
 			}
 		}
@@ -80,4 +86,21 @@ void ALaserProjectile::Hit(AActor* OtherActor) {
 
 void ALaserProjectile::Recall() {
 	recalled = true;
+}
+
+void ALaserProjectile::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// Replicate to everyone
+	DOREPLIFETIME(ALaserProjectile, explodeOnDestroy);
+}
+
+
+void ALaserProjectile::NoExplosion_Implementation() {
+	explodeOnDestroy = false;
+}
+
+bool ALaserProjectile::NoExplosion_Validate() {
+	return true;
 }

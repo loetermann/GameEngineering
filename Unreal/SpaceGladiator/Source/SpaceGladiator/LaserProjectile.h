@@ -16,7 +16,7 @@ class ALaserProjectile : public AActor
 public:
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Projectile)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Projectile)
 		bool explodeOnDestroy;
 
 	/** Capsule collision component */
@@ -32,10 +32,13 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	void SetDirection(FVector dir);
+	void SetDirection(FVector dir, float speed);
 
 	UFUNCTION()
 	void Hit(AActor* OtherActor);
+
+	UFUNCTION(Reliable, NetMulticast, WithValidation)
+	void NoExplosion();
 
 	void Recall();
 	

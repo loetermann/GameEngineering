@@ -15,6 +15,7 @@ class SPACEGLADIATOR_API ASpaceGladiatorPlayerController : public APlayerControl
 	
 	
 public:
+	ASpaceGladiatorPlayerController(const FObjectInitializer &ObjectInitializer);
 	void BeginPlayingState() override;
 	void SetupInputComponent() override;
 	void TurnLeft();
@@ -24,8 +25,10 @@ public:
 	void Turn(float Value);
 	void TiltCamera(float Value);
 	void PlayerTick(float DeltaTime);
+	void FireHold();
 	void Fire();
 	void Recall();
 	void PlaceWall();
+	bool IsPlacingWalls();
 
 };

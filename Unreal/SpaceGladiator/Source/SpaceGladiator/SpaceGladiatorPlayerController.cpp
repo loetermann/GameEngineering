@@ -5,8 +5,16 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "SpaceGladiatorPlayerController.h"
 #include "SGCharacter.h"
+#include "SpaceGladiatorGameMode.h"
+
+ASpaceGladiatorPlayerController::ASpaceGladiatorPlayerController(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer) {
+}
 
 void ASpaceGladiatorPlayerController::BeginPlayingState() {
+	if (HasAuthority()) {
+		PlayerState->SetPlayerName(FString::Printf(TEXT("Player %d"), Cast<ASpaceGladiatorGameMode>(GetWorld()->GetAuthGameMode())->nextID()));
+	}
+	/*
 	APawn *pawn = GetPawn();
 	if (IsValid(pawn)) {
 		UStaticMeshComponent* targeting = (UStaticMeshComponent*)pawn->FindComponentByClass(UStaticMeshComponent::StaticClass());
@@ -14,6 +22,7 @@ void ASpaceGladiatorPlayerController::BeginPlayingState() {
 			targeting->SetHiddenInGame(false);
 		}
 	}
+	*/
 }
 
 void ASpaceGladiatorPlayerController::SetupInputComponent() {
@@ -24,13 +33,17 @@ void ASpaceGladiatorPlayerController::SetupInputComponent() {
 	InputComponent->BindAxis(TEXT("Turn"), this, &ASpaceGladiatorPlayerController::Turn);
 	InputComponent->BindAxis(TEXT("Tilt"), this, &ASpaceGladiatorPlayerController::TiltCamera);
 
-	InputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &ASpaceGladiatorPlayerController::Fire);
+	InputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &ASpaceGladiatorPlayerController::FireHold);
+	InputComponent->BindAction(TEXT("Fire"), IE_Released, this, &ASpaceGladiatorPlayerController::Fire);
 	InputComponent->BindAction(TEXT("Recall"), IE_Pressed, this, &ASpaceGladiatorPlayerController::Recall);
 
 	InputComponent->BindAction(TEXT("ToggleWall"), IE_Pressed, this, &ASpaceGladiatorPlayerController::PlaceWall);
 }
 
 void ASpaceGladiatorPlayerController::TurnLeft() {
+	if (!Cast<ASGCharacter>(GetPawn())->IsAlive()) {
+		return;
+	}
 	UE_LOG(LogTemp, Warning, TEXT("TurnLeft"));
 	//APawn *Pawn = GetControlledPawn();
 	//Pawn->set
@@ -45,6 +58,9 @@ void ASpaceGladiatorPlayerController::TurnLeft() {
 }
 
 void ASpaceGladiatorPlayerController::TurnRight() {
+	if (!Cast<ASGCharacter>(GetPawn())->IsAlive()) {
+		return;
+	}
 	UE_LOG(LogTemp, Warning, TEXT("TurnRight"));
 	FRotator rotation = ControlRotation;
 	rotation.Add(0, 90.0f, 0);
@@ -85,13 +101,14 @@ void ASpaceGladiatorPlayerController::RotateCamera(FRotator Rotation) {
 	}
 }
 
-void ASpaceGladiatorPlayerController::RotateTargeting(FRotator Rotation)
-{
-	APawn *pawn = GetPawn();
+void ASpaceGladiatorPlayerController::RotateTargeting(FRotator Rotation) {
+	APawn* pawn = GetPawn();
+	ASGCharacter* character = Cast<ASGCharacter>(GetPawn());
+
 	if (IsValid(pawn)) {
-		UStaticMeshComponent* targeting = (UStaticMeshComponent*)pawn->FindComponentByClass(UStaticMeshComponent::StaticClass());
-		if (IsValid(targeting)) {
-			targeting->AddRelativeRotation(Rotation);
+		UStaticMeshComponent* canon = character->CanonComponent;  // UStaticMeshComponent* targeting = (UStaticMeshComponent*)pawn->FindComponentByClass(UStaticMeshComponent::StaticClass());
+		if (IsValid(canon)) {
+			canon->AddRelativeRotation({0.0f, Rotation.Yaw, 0.0f});
 		}
 	}
 }
@@ -101,9 +118,13 @@ void ASpaceGladiatorPlayerController::RotateTargeting(FRotator Rotation)
 void ASpaceGladiatorPlayerController::PlayerTick(float DeltaTime) {
 	Super::PlayerTick(DeltaTime);
 	APawn *pawn = GetPawn();
-	if (IsValid(pawn)) {
+	if (IsValid(pawn) && Cast<ASGCharacter>(GetPawn())->IsAlive()) {
 		pawn->GetMovementComponent()->AddInputVector(pawn->GetActorForwardVector());
 	}
+}
+
+void ASpaceGladiatorPlayerController::FireHold() {
+	Cast<ASGCharacter>(GetPawn())->FireHold();
 }
 
 void ASpaceGladiatorPlayerController::Fire() {
@@ -123,4 +144,8 @@ void ASpaceGladiatorPlayerController::Recall() {
 
 void ASpaceGladiatorPlayerController::PlaceWall() {
 	Cast<ASGCharacter>(GetPawn())->PlaceWall();
+}
+
+bool ASpaceGladiatorPlayerController::IsPlacingWalls() {
+	return IsValid(GetPawn()) && (Cast<ASGCharacter>(GetPawn())->CurrentWall);
 }

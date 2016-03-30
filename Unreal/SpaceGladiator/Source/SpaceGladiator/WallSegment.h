@@ -2,9 +2,12 @@
 
 #pragma once
 
+#include "Particles/ParticleSystemComponent.h"
+#include "Particles/ParticleSystem.h"
 #include "GameFramework/Actor.h"
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
+//#include "SGCharacter.h"
 #include "WallSegment.generated.h"
 
 UCLASS()
@@ -24,20 +27,36 @@ public:
 
 	void OnConstruction(const FTransform &Transform) override;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, ReplicatedUsing = NextSegmentChanged)
 	AWallSegment *NextSegment;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	AWallSegment *PrevSegment;
-	
+		
 	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	//ASGCharacter *OwningCharacter;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UParticleSystemComponent *WallBeams;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void SetBeamSource(AActor *source);
+	void SetBeamSource_Implementation(AActor *source);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void SetBeamTarget(AActor *target);
+	void SetBeamTarget_Implementation(AActor *target);
+
+	UFUNCTION()
+	void NextSegmentChanged();
+
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	//UBoxComponent *CollisionBox;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	USceneComponent *RootScene;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	USplineComponent *Spline;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	USplineMeshComponent *SplineMeshComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category="Spline")
@@ -46,9 +65,20 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void UpdateSplineLocation(FVector location);
 	void UpdateSplineLocation_Implementation(FVector location);
-	UFUNCTION(NetMulticast, Reliable)
-		void UpdateSplineStartLocation(FVector location);
-	void UpdateSplineStartLocation_Implementation(FVector location);
 
 	void UpdateSplineMesh();
+	UFUNCTION()
+	void OnBeginOverlap(AActor *OtherActor);
+
+	UFUNCTION(BlueprintCallable, Category="Space Gladiator|Walls")
+	void SetBeamColor(FColor Color);
+//	float IgnoreOverlapTime;
+	UPROPERTY(EditAnyWhere, Category="Space Gladiator|Walls")
+	float TimeToLive;
+	UPROPERTY(EditAnyWhere, Category = "Space Gladiator|Walls")
+	float LifeTime;
+	UPROPERTY(Replicated, EditAnyWhere, Category = "Space Gladiator|Walls")
+	FColor InitialWallColor;
+	UFUNCTION(BlueprintCallable, Category = "Space Gladiator|Walls")
+	void DestroyWall();
 };
