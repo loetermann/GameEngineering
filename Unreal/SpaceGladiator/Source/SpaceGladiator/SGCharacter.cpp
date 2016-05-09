@@ -122,7 +122,8 @@ inline bool IsCloseTo(float Rotation, float Degrees) {
 	return Result;
 }
 
-void ASGCharacter::Fire_Implementation(FVector bulletDirection) {
+
+void ASGCharacter::FireWithLoad_Implementation(FVector bulletDirection, float Load) {
 	if (!IsAlive() || IsInvincible()) {
 		return;
 	}
@@ -149,15 +150,25 @@ void ASGCharacter::Fire_Implementation(FVector bulletDirection) {
 		ALaserProjectile* const Projectile = World->SpawnActor<ALaserProjectile>(ProjectileClass, location, bulletDirection.Rotation(), SpawnParams);
 		if (Projectile)
 		{
-			Projectile->SetDirection(bulletDirection, MaxProjectileSpeed*FireLoad/MaxFireLoadTime);
+			Projectile->SetDirection(bulletDirection, MaxProjectileSpeed*Load / MaxFireLoadTime);
 		}
-		FireLoad = 0;
 	}
+}
+
+bool ASGCharacter::FireWithLoad_Validate(FVector bulletDirection, float Load) {
+	return true;
+}
+
+void ASGCharacter::Fire_Implementation(FVector bulletDirection) {
+		FireWithLoad(bulletDirection, FireLoad);
+		FireLoad = 0;
 }
 
 bool ASGCharacter::Fire_Validate(FVector bulletDirection) {
 	return true;
 }
+
+
 
 void ASGCharacter::RecallProjectiles_Implementation() {
 	if (!IsAlive() || IsInvincible()) {

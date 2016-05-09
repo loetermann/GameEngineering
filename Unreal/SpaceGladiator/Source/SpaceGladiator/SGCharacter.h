@@ -79,6 +79,12 @@ public:
 	bool Fire_Validate(FVector bulletDirection);
 
 	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
+	void FireWithLoad(FVector bulletDirection, float Load);
+	void FireWithLoad_Implementation(FVector bulletDirection, float Load);
+	bool FireWithLoad_Validate(FVector bulletDirection, float Load);
+
+
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
 	void RecallProjectiles();
 	void RecallProjectiles_Implementation();
 	bool RecallProjectiles_Validate();
