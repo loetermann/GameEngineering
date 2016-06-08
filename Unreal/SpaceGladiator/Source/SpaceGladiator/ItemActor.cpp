@@ -1,64 +1,69 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SpaceGladiator.h"
+#include "UnrealNetwork.h"
 #include "ItemActor.h"
-
+#include "SGCharacter.h"
 
 // Sets default values
 AItemActor::AItemActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	SetActorEnableCollision(true);
 
-	ItemCoinComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemCoin"));
-	ItemCoinComponent->RegisterComponent();
-	ItemCoinComponent->AttachTo(RootComponent);
+	YawPerSeconds = 150.0f;
+	ItemType = EItemType::ItemType_Magnet;
 
-	// TODO(Stephan): Set Location and Scale for Cage and ItemCoin 
-	// TODO(Stephan): Set Color and Item-Bitmap according to ItemType
-	// TODO(Stephan): Make Items rotate
-	// TODO(Stephan): Allow players to pick up items and store item field in SGCharacter
-	// TODO(Stephan): Allow players to use items (first, do nothing)
-	// TODO(Stephan): Implement different Item behaviours
-	// TODO(Stephan): Think about new items
+	// Our root component will be a sphere that reacts to physics
+	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
+	RootComponent = SphereComponent;
+	float SphereRadius = 100.0f;
+	SphereComponent->InitSphereRadius(SphereRadius);
+	SphereComponent->SetRelativeLocation(FVector(0.0f, 0.0f, SphereRadius));
+	SphereComponent->SetCollisionProfileName(TEXT("ItemCage"));
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> ItemCoinFinder(TEXT("StaticMesh'/Game/Meshes/ItemCoin.ItemCoin'"));
-
-	if (ItemCoinFinder.Object) {
-		ItemCoinComponent->StaticMesh = ItemCoinFinder.Object;
-		ItemCoinMesh = ItemCoinFinder.Object;
-	}
-	/*
-	ItemCoinComponent->SetRelativeScale3D(FVector(20.0f, 20.0f, 20.0f));
-	ItemCoinComponent->SetRelativeRotation(FRotator(0, -90.0f, 0));
-	*/
-
-	CageComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Cage"));
-	CageComponent->RegisterComponent();
-	CageComponent->AttachTo(RootComponent);
-	
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> CageFinder(TEXT("StaticMesh'/Game/Meshes/Cage.Cage'"));
-
-	if (CageFinder.Object) {
-		CageComponent->StaticMesh = CageFinder.Object;
+	Cage = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Cage"));
+	Cage->AttachTo(RootComponent);
+		
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> CageFinder(TEXT("StaticMesh'/Game/Items/ItemCage.ItemCage'"));
+	if (CageFinder.Succeeded()) {
 		CageMesh = CageFinder.Object;
+		Cage->SetStaticMesh(CageMesh);
 	}
-/*	
-	CageComponent->SetRelativeRotation(FRotator(0, -90.0f, 0));
-	CageComponent->SetRelativeScale3D(FVector(20.0f, 20.0f, 20.0f));
-	CageComponent->SetRelativeLocation(FVector(-10.0f, -0.0f, 47.0f));
-*/
+
+	
+	static ConstructorHelpers::FObjectFinder<UMaterialInstanceConstant> CageMaterialFinder(TEXT("MaterialInstanceConstant'/Game/Materials/CageMaterial.CageMaterial'"));
+	if (CageMaterialFinder.Succeeded()) {
+		CageMaterial = UMaterialInstanceDynamic::Create(CageMaterialFinder.Object, NULL);
+		CageMaterial->SetVectorParameterValue("GlowColor", ItemColors[(uint8)ItemType]);
+		Cage->SetMaterial(0, CageMaterial);
+	}
+
+	Cage->SetRelativeLocation(FVector(0.0f, 0.0f, -SphereRadius));
+	Cage->SetRelativeScale3D(FVector(2.7f, 2.7f, 2.7f));
+
+	Item = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Item"));
+	Item->AttachTo(SphereComponent);
+	
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> ItemFinder(TEXT("StaticMesh'/Game/Items/Item.Item'"));
+	if (ItemFinder.Succeeded()) {
+		ItemMesh = ItemFinder.Object;
+		Item->SetStaticMesh(ItemMesh);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterialInstanceConstant> ItemMaterialFinder(TEXT("MaterialInstanceConstant'/Game/Materials/ItemMaterials/ItemMaterial.ItemMaterial'"));
+	if (ItemMaterialFinder.Succeeded()) {
+		ItemMaterial = UMaterialInstanceDynamic::Create(ItemMaterialFinder.Object, NULL);
+		ItemMaterial->SetVectorParameterValue("GlowColor", ItemColors[(uint8)ItemType]);
+		Item->SetMaterial(0, ItemMaterial);
+	}
+
+	Item->SetRelativeLocation(FVector(0.0f, 0.0f, -SphereRadius));
+	Item->SetRelativeScale3D(FVector(2.7f, 2.7f, 2.7f));
+
+	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AItemActor::OnBeginOverlap);
 }
-
-void AItemActor::InitComponents() {
-	if (ItemCoinMesh) { ItemCoinComponent->SetStaticMesh(ItemCoinMesh); } 
-	if (CageMesh) { CageComponent->SetStaticMesh(CageMesh); }
-	if (ItemCoinMaterial) { ItemCoinComponent->SetMaterial(0, ItemCoinMaterial); }
-	if (CageMaterial) { CageComponent->SetMaterial(0, CageMaterial); }
- }
-
-void AItemActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) { Super::PostEditChangeProperty(PropertyChangedEvent); InitComponents(); }
-
 
 // Called when the game starts or when spawned
 void AItemActor::BeginPlay()
@@ -72,5 +77,37 @@ void AItemActor::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
+	Item->AddRelativeRotation(FRotator(0.0f, DeltaTime * YawPerSeconds, 0.0f));
 }
 
+void AItemActor::OnBeginOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor(1.0, 1.0, 1.0), "Overlap");
+
+	if (OtherActor->GetClass()->IsChildOf(ASGCharacter::StaticClass())) {
+		ASGCharacter* SpaceGladiator = (ASGCharacter*)OtherActor;
+		if (!SpaceGladiator->HasItem()) {
+			SpaceGladiator->AddItem(ItemType);
+			Destroy();
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor(1.0, 1.0, 1.0), "New Item");
+		}
+	}
+}
+
+void AItemActor::PostActorCreated()
+{
+	Super::PostActorCreated();
+	UE_LOG(LogTemp, Warning, TEXT("Finding Bitmap %s"), ItemTextures[(uint8)ItemType]);
+
+
+	UTexture* ItemBitmap = Cast<UTexture>(StaticLoadObject(UTexture::StaticClass(), NULL, ItemTextures[(uint8)ItemType]));
+	ItemMaterial->SetTextureParameterValue("GlowMask", ItemBitmap);
+}
+
+void AItemActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// Replicate to everyone
+	DOREPLIFETIME(AItemActor, ItemType);
+}

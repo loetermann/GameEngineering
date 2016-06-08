@@ -4,7 +4,9 @@
 
 #include "WallSegment.h"
 #include "GameFramework/Character.h"
+#include "ItemType.h"
 #include "SGCharacter.generated.h"
+
 
 UCLASS()
 class SPACEGLADIATOR_API ASGCharacter : public ACharacter
@@ -121,6 +123,11 @@ public:
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
+	UFUNCTION()
+	bool HasItem() { return ItemType != EItemType::ItemType_None; }
+	void AddItem(EItemType type) { ItemType = type; }
+
+	EItemType ItemType;
 
 	float WallMaxTime;
 	float CurrentWallTime;

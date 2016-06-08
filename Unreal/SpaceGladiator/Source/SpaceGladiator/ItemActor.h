@@ -3,15 +3,10 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "UnrealNetwork.h"
+#include "ItemType.h"
 #include "ItemActor.generated.h"
 
-UENUM(BlueprintType)
-enum class EItemType : uint8
-{
-    ItemType_Bomb 			UMETA(DisplayName="Bomb"),
-    ItemType_ClusterMine 	UMETA(DisplayName="Cluster Mine"),
-	ItemType_Magnet			UMETA(DisplayName="Magnet")
-};
 
 UCLASS()
 class SPACEGLADIATOR_API AItemActor : public AActor
@@ -28,32 +23,32 @@ public:
 	// Called every frame
 	virtual void Tick( float DeltaSeconds ) override;
 
-	// Todo(Stephan): Check what Category=Enum does
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Enum)
-	EItemType ItemType;
- 
+	UPROPERTY(EditAnywhere, Category = "Properties")
+	float YawPerSeconds;
 
-	/** Cage */
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Components")
-	UStaticMeshComponent* CageComponent;
-	UPROPERTY(AdvancedDisplay, Replicated, EditAnywhere, BlueprintReadWrite, Category = "Meshes")
-	UStaticMesh* CageMesh;
-	UPROPERTY(AdvancedDisplay, Replicated, EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	UMaterialInterface* CageMaterial;
-
-	/** ItemCoin */
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Components")
-	UStaticMeshComponent* ItemCoinComponent;
+	UStaticMeshComponent* Cage;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Meshes")
-	UStaticMesh* ItemCoinMesh;
+	UStaticMesh* CageMesh;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	UMaterialInterface* ItemCoinMaterial;
+	UMaterialInstanceDynamic* CageMaterial;
 
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Components")
+	UStaticMeshComponent* Item;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Meshes")
+	UStaticMesh* ItemMesh;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	UMaterialInstanceDynamic* ItemMaterial;
 
-private:
-	void InitComponents();
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Components")
+	USphereComponent* SphereComponent;
 
-	
-	
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Enum)
+	EItemType ItemType;
+
+	UFUNCTION()
+	void OnBeginOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	virtual void PostActorCreated() override;
 };

@@ -25,7 +25,6 @@ ASGCharacter::ASGCharacter()
 	bReplicates = true;
 
 	RacerComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Racer"));
-	RacerComponent->RegisterComponent();
 	RacerComponent->AttachTo(RootComponent);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> RacerFinder(TEXT("StaticMesh'/Game/Meshes/Racer.Racer'"));
@@ -37,7 +36,6 @@ ASGCharacter::ASGCharacter()
 	RacerComponent->SetRelativeScale3D(FVector(20.0f, 20.0f, 20.0f));
 	RacerComponent->SetRelativeRotation(FRotator(0, -90.0f, 0));
 	CanonComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Canon"));
-	CanonComponent->RegisterComponent();
 	CanonComponent->AttachTo(RootComponent);
 	
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CanonFinder(TEXT("StaticMesh'/Game/Meshes/Canon.Canon'"));
