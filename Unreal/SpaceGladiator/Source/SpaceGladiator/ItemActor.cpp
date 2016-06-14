@@ -82,26 +82,45 @@ void AItemActor::Tick( float DeltaTime )
 
 void AItemActor::OnBeginOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor(1.0, 1.0, 1.0), "Overlap");
+	// GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor(1.0, 1.0, 1.0), "Overlap");
 
 	if (OtherActor->GetClass()->IsChildOf(ASGCharacter::StaticClass())) {
 		ASGCharacter* SpaceGladiator = (ASGCharacter*)OtherActor;
 		if (!SpaceGladiator->HasItem()) {
 			SpaceGladiator->AddItem(ItemType);
 			Destroy();
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor(1.0, 1.0, 1.0), "New Item");
+			// GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor(1.0, 1.0, 1.0), "New Item");
 		}
 	}
+}
+
+void AItemActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) 
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	
+	ChangeMaterial();
 }
 
 void AItemActor::PostActorCreated()
 {
 	Super::PostActorCreated();
-	UE_LOG(LogTemp, Warning, TEXT("Finding Bitmap %s"), ItemTextures[(uint8)ItemType]);
+	
+	ChangeMaterial();
+}
 
-
-	UTexture* ItemBitmap = Cast<UTexture>(StaticLoadObject(UTexture::StaticClass(), NULL, ItemTextures[(uint8)ItemType]));
+void AItemActor::ChangeMaterial() 
+{
+	UTexture* ItemBitmap = Cast<UTexture>(StaticLoadObject(UTexture::StaticClass(), NULL, ItemGlowTextures[(uint8)ItemType]));
 	ItemMaterial->SetTextureParameterValue("GlowMask", ItemBitmap);
+
+	ItemMaterial->SetVectorParameterValue("GlowColor", ItemColors[(uint8)ItemType]);
+	CageMaterial->SetVectorParameterValue("GlowColor", ItemColors[(uint8)ItemType]);
+}
+
+void AItemActor::SetItemType(EItemType NewItemType)
+{
+	ItemType = NewItemType;
+	ChangeMaterial();
 }
 
 void AItemActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const

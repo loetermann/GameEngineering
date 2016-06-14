@@ -123,7 +123,7 @@ public:
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SpaceGladiatior")
 	bool HasItem() { return ItemType != EItemType::ItemType_None; }
 	void AddItem(EItemType type) { ItemType = type; }
 

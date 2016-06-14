@@ -18,10 +18,16 @@ static FLinearColor ItemColors[] = {
 };
 
 // This needs to be kept in sync with the ItemType Enum
-static TCHAR* ItemTextures[] = {
+static TCHAR* ItemGlowTextures[] = {
 	TEXT("Texture2D'/Engine/EditorLandscapeResources/WhiteSquareTexture.WhiteSquareTexture'"),
 	TEXT("Texture2D'/Game/Materials/ItemMaterials/ItemBomb.ItemBomb'"),
 	TEXT("Texture2D'/Game/Materials/ItemMaterials/ItemMagnet.ItemMagnet'"),
 	TEXT("Texture2D'/Game/Materials/ItemMaterials/ItemDetonator.ItemDetonator'"),
 };
 
+static TCHAR* ItemIcons[] = {
+	TEXT("Texture2D'/Engine/EditorLandscapeResources/WhiteSquareTexture.WhiteSquareTexture'"),
+	TEXT("Texture2D'/Game/Items/bomb.bomb'"),
+	TEXT("Texture2D'/Game/Items/Magnet.Magnet'"),
+	TEXT("Texture2D'/Game/Items/ClusterMine.ClusterMine'"),
+};

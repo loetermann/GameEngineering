@@ -51,4 +51,14 @@ public:
 
 	UFUNCTION()
 	virtual void PostActorCreated() override;
+
+	UFUNCTION()
+	void SetItemType(EItemType NewItemType);
+
+	UFUNCTION()
+	void ChangeMaterial();
+
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
+
 };
