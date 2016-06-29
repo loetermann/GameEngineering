@@ -3,6 +3,7 @@
 #include "SpaceGladiator.h"
 #include "UnrealNetwork.h"
 #include "ItemActor.h"
+#include "ItemSpawnPoint.h"
 #include "SGCharacter.h"
 
 // Sets default values
@@ -88,6 +89,7 @@ void AItemActor::OnBeginOverlap(AActor* OtherActor, UPrimitiveComponent* OtherCo
 		ASGCharacter* SpaceGladiator = (ASGCharacter*)OtherActor;
 		if (!SpaceGladiator->HasItem()) {
 			SpaceGladiator->AddItem(ItemType);
+			((AItemSpawnPoint*)spawnPoint)->currentSpawned = NULL;
 			Destroy();
 			// GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor(1.0, 1.0, 1.0), "New Item");
 		}
@@ -129,4 +131,9 @@ void AItemActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLif
 
 	// Replicate to everyone
 	DOREPLIFETIME(AItemActor, ItemType);
+}
+
+void AItemActor::SetSpawnPoint(AActor *p) {
+	spawnPoint = p;
+	((AItemSpawnPoint*)p)->currentSpawned = this;
 }

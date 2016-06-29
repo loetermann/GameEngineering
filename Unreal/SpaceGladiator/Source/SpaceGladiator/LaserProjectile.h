@@ -16,8 +16,8 @@ class ALaserProjectile : public AActor
 public:
 	
 	/** RecallSpeed */
-	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-		float MaxSpeed;
+	UPROPERTY(BlueprintReadWrite, Category = Projectile)
+	float MaxSpeed;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Projectile)
 		bool explodeOnDestroy;

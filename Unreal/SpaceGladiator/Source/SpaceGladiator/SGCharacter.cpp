@@ -148,7 +148,7 @@ void ASGCharacter::FireWithLoad_Implementation(FVector bulletDirection, float Lo
 		ALaserProjectile* const Projectile = World->SpawnActor<ALaserProjectile>(ProjectileClass, location, bulletDirection.Rotation(), SpawnParams);
 		if (Projectile)
 		{
-			Projectile->SetDirection(bulletDirection, Projectile->MaxSpeed*(FireLoad*0.8/MaxFireLoadTime+0.2));
+			Projectile->SetDirection(bulletDirection, Projectile->MaxSpeed*(Load*0.8/MaxFireLoadTime+0.2));
 		}
 	}
 }
