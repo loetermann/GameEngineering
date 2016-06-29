@@ -25,7 +25,6 @@ ASGCharacter::ASGCharacter()
 	bReplicates = true;
 
 	RacerComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Racer"));
-	RacerComponent->RegisterComponent();
 	RacerComponent->AttachTo(RootComponent);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> RacerFinder(TEXT("StaticMesh'/Game/Meshes/Racer.Racer'"));
@@ -37,7 +36,6 @@ ASGCharacter::ASGCharacter()
 	RacerComponent->SetRelativeScale3D(FVector(20.0f, 20.0f, 20.0f));
 	RacerComponent->SetRelativeRotation(FRotator(0, -90.0f, 0));
 	CanonComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Canon"));
-	CanonComponent->RegisterComponent();
 	CanonComponent->AttachTo(RootComponent);
 	
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CanonFinder(TEXT("StaticMesh'/Game/Meshes/Canon.Canon'"));
@@ -122,7 +120,8 @@ inline bool IsCloseTo(float Rotation, float Degrees) {
 	return Result;
 }
 
-void ASGCharacter::Fire_Implementation(FVector bulletDirection) {
+
+void ASGCharacter::FireWithLoad_Implementation(FVector bulletDirection, float Load) {
 	if (!IsAlive() || IsInvincible()) {
 		return;
 	}
@@ -151,13 +150,23 @@ void ASGCharacter::Fire_Implementation(FVector bulletDirection) {
 		{
 			Projectile->SetDirection(bulletDirection, Projectile->MaxSpeed*(FireLoad*0.8/MaxFireLoadTime+0.2));
 		}
-		FireLoad = 0;
 	}
+}
+
+bool ASGCharacter::FireWithLoad_Validate(FVector bulletDirection, float Load) {
+	return true;
+}
+
+void ASGCharacter::Fire_Implementation(FVector bulletDirection) {
+		FireWithLoad(bulletDirection, FireLoad);
+		FireLoad = 0;
 }
 
 bool ASGCharacter::Fire_Validate(FVector bulletDirection) {
 	return true;
 }
+
+
 
 void ASGCharacter::RecallProjectiles_Implementation() {
 	if (!IsAlive() || IsInvincible()) {
@@ -239,6 +248,21 @@ void ASGCharacter::AddWallSegment_Implementation() {
 bool ASGCharacter::AddWallSegment_Validate() {
 	return true;
 }
+
+void ASGCharacter::UseItem_Implementation() {
+	
+	if (HasItem()) {
+		ItemType = EItemType::ItemType_None;
+	}
+
+	return;
+}
+
+bool ASGCharacter::UseItem_Validate() {
+	return true;
+}
+
+
 
 float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) {
 	if (IsInvincible()&&DamageCauser!=this) {
@@ -349,6 +373,7 @@ void ASGCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutL
 	DOREPLIFETIME(ASGCharacter, FireLoad);
 	DOREPLIFETIME(ASGCharacter, MaxFireLoadTime);
 	DOREPLIFETIME(ASGCharacter, CurrentWall);
+	DOREPLIFETIME(ASGCharacter, ItemType);
 }
 
 bool ASGCharacter::IsAlive() {

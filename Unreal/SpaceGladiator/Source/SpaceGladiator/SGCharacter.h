@@ -4,7 +4,9 @@
 
 #include "WallSegment.h"
 #include "GameFramework/Character.h"
+#include "ItemType.h"
 #include "SGCharacter.generated.h"
+
 
 UCLASS()
 class SPACEGLADIATOR_API ASGCharacter : public ACharacter
@@ -75,6 +77,16 @@ public:
 	bool Fire_Validate(FVector bulletDirection);
 
 	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
+	void FireWithLoad(FVector bulletDirection, float Load);
+	void FireWithLoad_Implementation(FVector bulletDirection, float Load);
+	bool FireWithLoad_Validate(FVector bulletDirection, float Load);
+
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
+	void UseItem();
+	void UseItem_Implementation();
+	bool UseItem_Validate();
+
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
 	void RecallProjectiles();
 	void RecallProjectiles_Implementation();
 	bool RecallProjectiles_Validate();
@@ -111,6 +123,11 @@ public:
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
+	UFUNCTION(BlueprintCallable, Category = "SpaceGladiatior")
+	bool HasItem() { return ItemType != EItemType::ItemType_None; }
+	void AddItem(EItemType type) { ItemType = type; }
+
+	EItemType ItemType;
 
 	float WallMaxTime;
 	float CurrentWallTime;

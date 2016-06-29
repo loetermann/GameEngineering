@@ -30,5 +30,5 @@ public:
 	void Recall();
 	void PlaceWall();
 	bool IsPlacingWalls();
-
+	void UseItem();
 };

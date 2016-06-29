@@ -1,0 +1,57 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{ngerman}
+\usepackage[pdftex]{graphicx}
+\usepackage{float}
+\DeclareGraphicsExtensions{.pdf,.png,.eps,.jpg}
+\usepackage{gensymb}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper, margin=0.5in]{geometry}
+
+\author{Gruppe 2 - Felix Friese, Aljoscha Schmidt,\\Stephan Wenninger, Lars Oetermann}
+\title{Space Gladiator - Prototype Testing Results}
+\begin{document}
+\maketitle
+\section{Strengths}
+\begin{itemize}
+ \item Multiplayer Mode
+ \item Cool Colors
+ \item Nice design of Walls
+\end{itemize}
+
+\section{Weaknesses and Actions}
+\begin{tabular}{ l | l | l | l }
+\textbf{Category} & \textbf{Weaknesses} & \textbf{Actions} & \textbf{Priority} \\
+\hline                                          
+Game Play & Power Ups are missing & Implement that Items can be collected & High \\
+& & Design and Implement different Items & Middle \\
+\hline
+& Walls/Projectiles stay on Death & Remove them & Middle \\
+\hline
+& Projectile Damage is rather low & Increase Damage depending on charge/range & Middle \\
+\hline
+& Difficult to shot straight forward & Snap canon via Hotkey & Low \\
+\hline
+User Interface & Menu is missing & Implement a Main Menu & High \\
+& & Implement a Lobby & Middle \\
+& & Implement an Options Menu & Low \\
+\hline
+& ProgressBars (Life, ...) out of Focus & Design new ProgressBars & Middle \\
+\hline
+& ProgressBar for WallCooldown missing & Add one & High \\
+\hline
+& Not possible to get an overview & Implement a MiniMap & Very Low \\
+\hline
+Graphics Design & No visual Feedback of ProjectileRange & Implement a preview & Low \\
+\hline
+& MapBorders block View on Racer & Try different stategies, e.g. transparent Borders & Middle \\
+\hline
+& Rotation is uncool & Create an animation & Low
+
+\end{tabular}
+
+
+\end{document}
