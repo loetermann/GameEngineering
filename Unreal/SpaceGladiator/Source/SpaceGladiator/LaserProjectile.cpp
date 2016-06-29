@@ -37,15 +37,15 @@ void ALaserProjectile::Tick( float DeltaTime )
 	Super::Tick( DeltaTime );
 	if (recalled) {
 		direction = (GetOwner()->GetActorLocation() - GetActorLocation());
-		if (direction.Size() < 4000*DeltaTime) {
+		if (direction.Size() < MaxSpeed*DeltaTime) {
 			NoExplosion();
 			Destroy();
 		}
 		direction.Normalize();
-		direction *= 4000;
+		direction *= MaxSpeed;
 		SetActorRotation(FRotator(90, 0, 0) + direction.Rotation());
 	} else {
-		direction *= (1-2*DeltaTime);
+		direction *= (1-DeltaTime);
 		if (direction.Size() < 1) {
 			direction = FVector::ZeroVector;
 		}
@@ -71,10 +71,10 @@ void ALaserProjectile::Hit(AActor* OtherActor) {
 		if (GetOwner() != OtherActor) {
 			if (OtherActor->GetClass()->IsChildOf(ASGCharacter::StaticClass())) {
 				if(recalled) {
-					Cast<ASGCharacter>(OtherActor)->TakeDamage(75, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
+					Cast<ASGCharacter>(OtherActor)->TakeDamage(direction.Size() * 50 / MaxSpeed + 25, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
 				}
 				else {
-					Cast<ASGCharacter>(OtherActor)->TakeDamage(25, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
+					Cast<ASGCharacter>(OtherActor)->TakeDamage(direction.Size() * 30 / MaxSpeed + 10, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
 				}
 				Destroy();
 			} else if (!OtherActor->GetClass()->IsChildOf(ALaserProjectile::StaticClass()) && OtherActor != Cast<ASGCharacter>(GetOwner())->CurrentWall) {

@@ -149,7 +149,7 @@ void ASGCharacter::Fire_Implementation(FVector bulletDirection) {
 		ALaserProjectile* const Projectile = World->SpawnActor<ALaserProjectile>(ProjectileClass, location, bulletDirection.Rotation(), SpawnParams);
 		if (Projectile)
 		{
-			Projectile->SetDirection(bulletDirection, MaxProjectileSpeed*FireLoad/MaxFireLoadTime);
+			Projectile->SetDirection(bulletDirection, Projectile->MaxSpeed*(FireLoad*0.8/MaxFireLoadTime+0.2));
 		}
 		FireLoad = 0;
 	}
@@ -278,6 +278,18 @@ float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEv
 			PlaceWall();
 		}
 		explode();
+		for (TActorIterator<ALaserProjectile> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			if (ActorItr->GetOwner() == this) {
+				ActorItr->Destroy();
+			}
+		}
+		for (TActorIterator<AWallSegment> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			if (ActorItr->GetOwner() == this) {
+				ActorItr->DestroyWall();
+			}
+		}
 		SetActorHiddenInGame(true);
 		SetActorEnableCollision(false);
 		GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ASGCharacter::respawn, 0.75);

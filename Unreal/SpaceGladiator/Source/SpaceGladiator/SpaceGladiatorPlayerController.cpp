@@ -38,6 +38,7 @@ void ASpaceGladiatorPlayerController::SetupInputComponent() {
 	InputComponent->BindAction(TEXT("Recall"), IE_Pressed, this, &ASpaceGladiatorPlayerController::Recall);
 
 	InputComponent->BindAction(TEXT("ToggleWall"), IE_Pressed, this, &ASpaceGladiatorPlayerController::PlaceWall);
+	InputComponent->BindAxis(TEXT("SnapCanon"));
 }
 
 void ASpaceGladiatorPlayerController::TurnLeft() {
@@ -131,10 +132,16 @@ void ASpaceGladiatorPlayerController::Fire() {
 	ASGCharacter* Character = Cast<ASGCharacter>(GetPawn());
 	// Get the camera transform
 	FRotator CameraRot;
-	USpringArmComponent* springArm = (USpringArmComponent*)Character->FindComponentByClass(USpringArmComponent::StaticClass());
-	if (IsValid(springArm)) {
-		CameraRot = springArm->GetComponentRotation();
+	if (InputComponent->GetAxisValue(TEXT("SnapCanon")) > 0) {
+		CameraRot = ControlRotation;
 	}
+	else {
+		USpringArmComponent* springArm = (USpringArmComponent*)Character->FindComponentByClass(USpringArmComponent::StaticClass());
+		if (IsValid(springArm)) {
+			CameraRot = springArm->GetComponentRotation();
+		}
+	}
+
 	Character->Fire(CameraRot.Vector());
 }
 

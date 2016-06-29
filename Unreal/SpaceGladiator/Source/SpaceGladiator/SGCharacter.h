@@ -37,10 +37,6 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Projectile)
 		float MaxFireLoadTime;
 
-	/** MaxProjectileSpeed */
-	UPROPERTY(EditDefaultsOnly, Category = Projectile)
-		float MaxProjectileSpeed;
-
 	/** Canon */
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UStaticMeshComponent* CanonComponent;
