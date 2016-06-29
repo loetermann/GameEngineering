@@ -41,7 +41,7 @@ void ASGHUD::DrawHUD() {
 
 		if (!ItemBitmap) { GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor(1.0, 1.0, 1.0), "No Item Bitmap Loaded"); }
 		DrawTexture(ItemBitmap, Width/2 - ITEM_ICON_HALF_DIM, Height - ITEM_ICON_Y_OFFSET, ITEM_ICON_DIM, ITEM_ICON_DIM, 
-					0, 0, 1, 1, FLinearColor::Blue);
+					0, 0, 1, 1, ItemColors[(uint8)ownedPawn->ItemType]);
 	}
 
 	for (AActor* pawn : allPawns) {

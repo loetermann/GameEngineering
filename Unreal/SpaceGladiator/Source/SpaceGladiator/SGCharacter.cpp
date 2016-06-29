@@ -249,6 +249,21 @@ bool ASGCharacter::AddWallSegment_Validate() {
 	return true;
 }
 
+void ASGCharacter::UseItem_Implementation() {
+	
+	if (HasItem()) {
+		ItemType = EItemType::ItemType_None;
+	}
+
+	return;
+}
+
+bool ASGCharacter::UseItem_Validate() {
+	return true;
+}
+
+
+
 float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) {
 	if (IsInvincible()&&DamageCauser!=this) {
 		return 0;
@@ -346,6 +361,7 @@ void ASGCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutL
 	DOREPLIFETIME(ASGCharacter, FireLoad);
 	DOREPLIFETIME(ASGCharacter, MaxFireLoadTime);
 	DOREPLIFETIME(ASGCharacter, CurrentWall);
+	DOREPLIFETIME(ASGCharacter, ItemType);
 }
 
 bool ASGCharacter::IsAlive() {

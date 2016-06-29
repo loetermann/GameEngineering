@@ -38,6 +38,8 @@ void ASpaceGladiatorPlayerController::SetupInputComponent() {
 	InputComponent->BindAction(TEXT("Recall"), IE_Pressed, this, &ASpaceGladiatorPlayerController::Recall);
 
 	InputComponent->BindAction(TEXT("ToggleWall"), IE_Pressed, this, &ASpaceGladiatorPlayerController::PlaceWall);
+
+	InputComponent->BindAction(TEXT("UseItem"), IE_Pressed, this, &ASpaceGladiatorPlayerController::UseItem);
 }
 
 void ASpaceGladiatorPlayerController::TurnLeft() {
@@ -148,4 +150,8 @@ void ASpaceGladiatorPlayerController::PlaceWall() {
 
 bool ASpaceGladiatorPlayerController::IsPlacingWalls() {
 	return IsValid(GetPawn()) && (Cast<ASGCharacter>(GetPawn())->CurrentWall);
+}
+
+void ASpaceGladiatorPlayerController::UseItem() {
+	Cast<ASGCharacter>(GetPawn())->UseItem();
 }
