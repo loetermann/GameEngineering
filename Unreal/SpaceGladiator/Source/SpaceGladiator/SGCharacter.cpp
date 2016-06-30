@@ -252,6 +252,20 @@ bool ASGCharacter::AddWallSegment_Validate() {
 void ASGCharacter::UseItem_Implementation() {
 	
 	if (HasItem()) {
+		switch (ItemType) {
+			case EItemType::ItemType_Magnet: {
+				for (TActorIterator<ALaserProjectile> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+				{
+					ActorItr->SetOwner(this);
+					ActorItr->Recall();
+				}
+			} break;
+
+			default: {
+
+			}
+		}
+
 		ItemType = EItemType::ItemType_None;
 	}
 
