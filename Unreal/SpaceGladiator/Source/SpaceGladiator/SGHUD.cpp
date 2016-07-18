@@ -35,6 +35,10 @@ void ASGHUD::DrawHUD() {
 	int32 Width, Height;
 	GetOwningPlayerController()->GetViewportSize(Width, Height);
 
+	if (!IsValid(ownedPawn)) {
+		return;
+	}
+
 	//Show Current Item
 	if (ownedPawn->HasItem()) {
 		UTexture2D* ItemBitmap = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass(), NULL, ItemIcons[(uint8)ownedPawn->ItemType]));

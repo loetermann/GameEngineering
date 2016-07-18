@@ -127,6 +127,7 @@ public:
 	bool HasItem() { return ItemType != EItemType::ItemType_None; }
 	void AddItem(EItemType type) { ItemType = type; }
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Player)
 	EItemType ItemType;
 
 	float WallMaxTime;
