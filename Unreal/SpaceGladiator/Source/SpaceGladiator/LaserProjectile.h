@@ -16,7 +16,7 @@ class ALaserProjectile : public AActor
 public:
 	
 	/** RecallSpeed */
-	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Projectile)
 		float MaxSpeed;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Projectile)

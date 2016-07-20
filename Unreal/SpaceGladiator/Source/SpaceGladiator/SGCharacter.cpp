@@ -86,7 +86,7 @@ void ASGCharacter::Tick( float DeltaTime )
 	if (IsValid(CurrentWall)) {
 		CurrentWall->UpdateSplineLocation_Implementation(GetActorLocation());
 		CurrentWallTime += DeltaTime;
-		if (CurrentWallTime > WallMaxTime) {
+		if (CurrentWallTime > WallMaxTime && HasAuthority()) {
 			PlaceWall();
 		}
 	}

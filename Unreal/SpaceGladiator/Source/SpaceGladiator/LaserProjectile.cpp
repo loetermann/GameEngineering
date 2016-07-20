@@ -45,7 +45,7 @@ void ALaserProjectile::Tick( float DeltaTime )
 		direction *= MaxSpeed;
 		SetActorRotation(FRotator(90, 0, 0) + direction.Rotation());
 	} else {
-		direction *= (1-DeltaTime);
+		direction -= DeltaTime * direction.GetSafeNormal() * MaxSpeed/2.0;
 		if (direction.Size() < 1) {
 			direction = FVector::ZeroVector;
 		}
