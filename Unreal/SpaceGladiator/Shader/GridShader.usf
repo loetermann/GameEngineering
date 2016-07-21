@@ -1,0 +1,7 @@
+float3 MaterialExpressionCalcGridIntensity(FMaterialPixelParameters Parameters, MaterialFloat3 TextureSample, MaterialFloat4 CharacterPosition)
+{
+    MaterialFloat3 DistanceVector = CharacterPosition.rgb - GetWorldPosition(Parameters);
+    MaterialFloat Distance = sqrt(dot(DistanceVector, DistanceVector));
+    MaterialFloat3 Intensity = TextureSample.rgb / (Distance * 0.00500000);
+    return Intensity;
+}

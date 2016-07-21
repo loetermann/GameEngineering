@@ -9,3 +9,5 @@
 !*.h
 !*.cpp
 !*.diff
+!Shader/
+!*.usf
