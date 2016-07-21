@@ -55,12 +55,12 @@ void ASGHUD::DrawHUD() {
 			FVector2D ScreenPosition;
 			bool IsOnScreen = UGameplayStatics::ProjectWorldToScreen(GetOwningPlayerController(), Position, ScreenPosition);
 			if (IsOnScreen && castedPawn != ownedPawn) {
-				DrawText(castedPawn->GetName(), FLinearColor(1, 1, 1, 0.25f), ScreenPosition.X, ScreenPosition.Y);
+				DrawText(castedPawn->GetName(), FLinearColor(1, 1, 1, 0.75f), ScreenPosition.X, ScreenPosition.Y);
 				//Background of Health-Bar
-				DrawRect(FLinearColor(0.74f, 0.74f, 0.74f, 0.25f), ScreenPosition.X + HEALTH_BAR_X_OFFSET, ScreenPosition.Y + HEALTH_BAR_Y_OFFSET, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT);
+				DrawRect(FLinearColor(0.74f, 0.74f, 0.74f, 1.00f), ScreenPosition.X + HEALTH_BAR_X_OFFSET, ScreenPosition.Y + HEALTH_BAR_Y_OFFSET, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT);
 				//Fill Health Bar
 				float WidthScale = castedPawn->Health / 100.0f;
-				DrawRect(FLinearColor(0, 0.54f, 0, 0.25f), ScreenPosition.X + HEALTH_BAR_X_OFFSET + 1, ScreenPosition.Y + HEALTH_BAR_Y_OFFSET + 1, WidthScale * (HEALTH_BAR_WIDTH-2), HEALTH_BAR_HEIGHT - 2);
+				DrawRect(FLinearColor(0, 0.54f, 0, 0.75f), ScreenPosition.X + HEALTH_BAR_X_OFFSET + 1, ScreenPosition.Y + HEALTH_BAR_Y_OFFSET + 1, WidthScale * (HEALTH_BAR_WIDTH-2), HEALTH_BAR_HEIGHT - 2);
 			}
 		}
 	}

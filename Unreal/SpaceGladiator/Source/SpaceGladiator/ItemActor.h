@@ -59,6 +59,7 @@ public:
 	void ChangeMaterial();
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-
-
+	void SetSpawnPoint(AActor *p);
+private:
+	AActor *spawnPoint;
 };
