@@ -2,6 +2,8 @@
 
 #include "SpaceGladiator.h"
 #include "DrawDebugHelpers.h"
+#include "ItemType.h"
+#include "ItemSpawnPoint.h"
 #include "SGBlueprintUtilities.h"
 
 FVector USGBlueprintUtilities::CalculateAIAiming(APawn *shooter, APawn *target, float projectileVelocity) {
@@ -37,4 +39,29 @@ FVector USGBlueprintUtilities::CalculateAIAiming(APawn *shooter, APawn *target, 
 	return result;
 }
 
+float USGBlueprintUtilities::GetMaxProjectileSpeed() {
+	return 10000.0f;
+}
+
+void USGBlueprintUtilities::SpawnItem(UObject *context, EItemType type)
+{
+	/*
+	TActorIterator<AItemSpawnPoint> ActorItr(GetWorld());
+	for (TActorIterator<AItemSpawnPoint> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		
+	}
+	*/
+	if (IsValid(context)) {
+		TArray<AActor*> spawns;
+		UGameplayStatics::GetAllActorsOfClass(context, AItemSpawnPoint::StaticClass(), spawns);
+		if (spawns.Num() > 0) {
+			int32 spawnIndex = FMath::RandRange(0, spawns.Num()-1);
+			AItemSpawnPoint *spawnPoint = (AItemSpawnPoint*)spawns[spawnIndex];
+			if (IsValid(spawnPoint)) {
+				spawnPoint->SpawnItem(type);
+			}
+		}
+	}
+}
 

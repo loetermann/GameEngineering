@@ -17,5 +17,8 @@ class SPACEGLADIATOR_API USGBlueprintUtilities : public UBlueprintFunctionLibrar
 public:
 	UFUNCTION(BlueprintCallable, Category="SpaceGladiator")
 	static FVector CalculateAIAiming(APawn *shooter, APawn *target, float projectileVelocity);
-	
+	UFUNCTION(BlueprintCallable, Category ="SpaceGlacidator")
+	static float GetMaxProjectileSpeed();
+	UFUNCTION(BlueprintCallable, Category = "SpaceGladiator")
+	static void SpawnItem(UObject *context, EItemType type);
 };

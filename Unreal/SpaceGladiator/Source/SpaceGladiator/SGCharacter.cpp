@@ -148,7 +148,7 @@ void ASGCharacter::FireWithLoad_Implementation(FVector bulletDirection, float Lo
 		ALaserProjectile* const Projectile = World->SpawnActor<ALaserProjectile>(ProjectileClass, location, bulletDirection.Rotation(), SpawnParams);
 		if (Projectile)
 		{
-			Projectile->SetDirection(bulletDirection, Projectile->MaxSpeed*(FireLoad*0.8/MaxFireLoadTime+0.2));
+			Projectile->SetDirection(bulletDirection, Projectile->MaxSpeed*(Load*0.8/MaxFireLoadTime+0.2));
 		}
 	}
 }
@@ -252,6 +252,20 @@ bool ASGCharacter::AddWallSegment_Validate() {
 void ASGCharacter::UseItem_Implementation() {
 	
 	if (HasItem()) {
+		switch (ItemType) {
+			case EItemType::ItemType_Magnet: {
+				for (TActorIterator<ALaserProjectile> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+				{
+					ActorItr->SetOwner(this);
+					ActorItr->Recall();
+				}
+			} break;
+
+			default: {
+
+			}
+		}
+
 		ItemType = EItemType::ItemType_None;
 	}
 
