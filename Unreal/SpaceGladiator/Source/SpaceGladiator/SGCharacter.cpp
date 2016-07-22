@@ -261,9 +261,37 @@ void ASGCharacter::UseItem_Implementation() {
 				}
 			} break;
 
-			default: {
+			// TODO: Start a Timer and set back to normal for all Items 
 
-			}
+			case EItemType::ItemType_InvertControls: {
+				for (TActorIterator<ASGCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+				{
+					ActorItr->HasReversedControlls = true;
+				}
+				// TODO: Rewire Controlls for Left and Right
+
+			} break;
+
+			case EItemType::ItemType_InvertCamera: {
+				for (TActorIterator<ASGCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+				{
+					ActorItr->IsCameraReversed = true;
+				}
+				// TODO: Actually flip camera
+
+			} break;
+
+			case EItemType::ItemType_ProjectileAbsorb: {
+				AbsorbsProjectiles = true;
+				// TODO: Handle the AbsorbsProjectiles Flag in TakeDamage
+
+			} break;
+
+			case EItemType::ItemType_Unstoppable: {
+				// TODO: Handle the IsUnstoppable Flag in TakeDamage and Wall Collision
+				IsUnstoppable = true;
+
+			} break;
 		}
 
 		ItemType = EItemType::ItemType_None;

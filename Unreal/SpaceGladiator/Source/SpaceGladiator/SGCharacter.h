@@ -135,6 +135,11 @@ public:
 	float WallCooldown;
 	float CurrentWallCooldown;
 
+	bool HasReversedControlls;
+	bool IsCameraReversed;
+	bool AbsorbsProjectiles;
+	bool IsUnstoppable;
+
 private:
 	void InitComponents();
 	UFUNCTION(BlueprintCallable, Category = "SpaceGladiator")
