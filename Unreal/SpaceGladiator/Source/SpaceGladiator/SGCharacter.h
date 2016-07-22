@@ -123,7 +123,7 @@ public:
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
-	UFUNCTION(BlueprintCallable, Category = "SpaceGladiatior")
+	UFUNCTION(BlueprintCallable, Category = "SpaceGladiator")
 	bool HasItem() { return ItemType != EItemType::ItemType_None; }
 	void AddItem(EItemType type) { ItemType = type; }
 
@@ -134,6 +134,11 @@ public:
 	float CurrentWallTime;
 	float WallCooldown;
 	float CurrentWallCooldown;
+
+	bool HasReversedControlls;
+	bool IsCameraReversed;
+	bool AbsorbsProjectiles;
+	bool IsUnstoppable;
 
 private:
 	void InitComponents();

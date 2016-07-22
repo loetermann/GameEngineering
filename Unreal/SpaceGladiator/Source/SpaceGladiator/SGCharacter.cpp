@@ -148,7 +148,7 @@ void ASGCharacter::FireWithLoad_Implementation(FVector bulletDirection, float Lo
 		ALaserProjectile* const Projectile = World->SpawnActor<ALaserProjectile>(ProjectileClass, location, bulletDirection.Rotation(), SpawnParams);
 		if (Projectile)
 		{
-			Projectile->SetDirection(bulletDirection, Projectile->MaxSpeed*(FireLoad*0.8/MaxFireLoadTime+0.2));
+			Projectile->SetDirection(bulletDirection, Projectile->MaxSpeed*(Load*0.8/MaxFireLoadTime+0.2));
 		}
 	}
 }
@@ -252,6 +252,48 @@ bool ASGCharacter::AddWallSegment_Validate() {
 void ASGCharacter::UseItem_Implementation() {
 	
 	if (HasItem()) {
+		switch (ItemType) {
+			case EItemType::ItemType_Magnet: {
+				for (TActorIterator<ALaserProjectile> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+				{
+					ActorItr->SetOwner(this);
+					ActorItr->Recall();
+				}
+			} break;
+
+			// TODO: Start a Timer and set back to normal for all Items 
+
+			case EItemType::ItemType_InvertControls: {
+				for (TActorIterator<ASGCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+				{
+					ActorItr->HasReversedControlls = true;
+				}
+				// TODO: Rewire Controlls for Left and Right
+
+			} break;
+
+			case EItemType::ItemType_InvertCamera: {
+				for (TActorIterator<ASGCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+				{
+					ActorItr->IsCameraReversed = true;
+				}
+				// TODO: Actually flip camera
+
+			} break;
+
+			case EItemType::ItemType_ProjectileAbsorb: {
+				AbsorbsProjectiles = true;
+				// TODO: Handle the AbsorbsProjectiles Flag in TakeDamage
+
+			} break;
+
+			case EItemType::ItemType_Unstoppable: {
+				// TODO: Handle the IsUnstoppable Flag in TakeDamage and Wall Collision
+				IsUnstoppable = true;
+
+			} break;
+		}
+
 		ItemType = EItemType::ItemType_None;
 	}
 
