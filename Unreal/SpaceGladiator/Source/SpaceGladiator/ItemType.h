@@ -14,11 +14,11 @@ enum class EItemType : uint8
 // This needs to be kept in sync with the ItemType Enum
 static FLinearColor ItemColors[] = {
 	{ 0.00f, 0.00f, 0.00f, 0.0f },    // None
-	{ 0.66f, 1.00f, 0.00f, 1.0f },    // Controls
+	{ 0.00f, 1.00f, 0.00f, 1.0f },    // Controls
 	{ 1.00f, 0.66f, 0.00f, 1.0f },    // Camera
 	{ 1.00f, 0.00f, 0.66f, 1.0f },    // Magnet 
 	{ 0.00f, 0.66f, 1.00f, 1.0f },    // Absorb
-	{ 0.66f, 0.00f, 1.00f, 1.0f },    // Unstoppable
+	{ 0.00f, 0.00f, 1.00f, 1.0f },    // Unstoppable
 };
 
 // This needs to be kept in sync with the ItemType Enum
@@ -33,7 +33,7 @@ static TCHAR* ItemGlowTextures[] = {
 
 static TCHAR* ItemIcons[] = {
 	TEXT("Texture2D'/Engine/EditorLandscapeResources/WhiteSquareTexture.WhiteSquareTexture'"),
-	TEXT("Texture2D'/Game/Items/InvertCamera.InvertControls'"),
+	TEXT("Texture2D'/Game/Items/InvertControls.InvertControls'"),
 	TEXT("Texture2D'/Game/Items/InvertCamera.InvertCamera'"),
 	TEXT("Texture2D'/Game/Items/Magnet.Magnet'"),
 	// TODO: Replace with new icons

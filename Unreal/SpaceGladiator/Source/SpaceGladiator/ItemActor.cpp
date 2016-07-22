@@ -63,6 +63,18 @@ AItemActor::AItemActor()
 	Item->SetRelativeLocation(FVector(0.0f, 0.0f, -SphereRadius));
 	Item->SetRelativeScale3D(FVector(2.7f, 2.7f, 2.7f));
 
+	SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	SphereComponent->SetCollisionObjectType(ECC_Pawn);
+
+	SphereComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
+	SphereComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	SphereComponent->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	
+	if (Item && Cage) {
+		Item->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Cage->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
 	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AItemActor::OnBeginOverlap);
 }
 
@@ -89,7 +101,10 @@ void AItemActor::OnBeginOverlap(AActor* OtherActor, UPrimitiveComponent* OtherCo
 		ASGCharacter* SpaceGladiator = (ASGCharacter*)OtherActor;
 		if (!SpaceGladiator->HasItem()) {
 			SpaceGladiator->AddItem(ItemType);
-			((AItemSpawnPoint*)spawnPoint)->currentSpawned = NULL;
+
+			if (spawnPoint != NULL) {
+				((AItemSpawnPoint*)spawnPoint)->currentSpawned = NULL;
+			}
 			Destroy();
 			// GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor(1.0, 1.0, 1.0), "New Item");
 		}
