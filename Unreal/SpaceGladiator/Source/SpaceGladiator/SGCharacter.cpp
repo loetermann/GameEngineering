@@ -5,7 +5,7 @@
 #include "LaserProjectile.h"
 #include "SGPlayerState.h"
 #include "UnrealNetwork.h"
-
+#include "SpaceGladiatorPlayerController.h"
 
 // Sets default values
 ASGCharacter::ASGCharacter()
@@ -267,8 +267,10 @@ void ASGCharacter::UseItem_Implementation() {
 				for (TActorIterator<ASGCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 				{
 					ActorItr->HasReversedControlls = true;
+					ASpaceGladiatorPlayerController *controller;
+					if (*ActorItr != this && (controller = Cast<ASpaceGladiatorPlayerController>(ActorItr->GetController())) != NULL)
+						controller->InvertControls();
 				}
-				// TODO: Rewire Controlls for Left and Right
 
 			} break;
 

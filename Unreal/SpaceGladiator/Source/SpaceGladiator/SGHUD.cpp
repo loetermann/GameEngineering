@@ -5,6 +5,7 @@
 #include "SGCharacter.h"
 #include "SGHUD.h"
 #include "ItemType.h"
+#include "SpaceGladiatorPlayerController.h"
 
 
 #define HEALTH_BAR_X_OFFSET 0
@@ -46,6 +47,16 @@ void ASGHUD::DrawHUD() {
 		if (!ItemBitmap) { GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor(1.0, 1.0, 1.0), "No Item Bitmap Loaded"); }
 		DrawTexture(ItemBitmap, Width/2 - ITEM_ICON_HALF_DIM, Height - ITEM_ICON_Y_OFFSET, ITEM_ICON_DIM, ITEM_ICON_DIM, 
 					0, 0, 1, 1, ItemColors[(uint8)ownedPawn->ItemType]);
+	}
+
+	if (ASpaceGladiatorPlayerController *controller = Cast<ASpaceGladiatorPlayerController>(ownedPawn->GetController())) {
+		if (controller->GetIsControlInverted()) {
+			UTexture2D *ItemBitmap = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass(), NULL, ItemIcons[(uint8)EItemType::ItemType_InvertControls]));
+			if (ItemBitmap) {
+				DrawTexture(ItemBitmap, Width / 2 - ITEM_ICON_HALF_DIM, Height / 2 - ITEM_ICON_HALF_DIM, ITEM_ICON_DIM, ITEM_ICON_DIM,
+					0,0,1,1,ItemColors[(uint8)EItemType::ItemType_InvertControls]);
+			}
+		}
 	}
 
 	for (AActor* pawn : allPawns) {
