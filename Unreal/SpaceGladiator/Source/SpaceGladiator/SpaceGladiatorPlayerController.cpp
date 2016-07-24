@@ -97,7 +97,12 @@ void ASpaceGladiatorPlayerController::RotateCamera(FRotator Rotation) {
 			else if (rot.Pitch > 0) {
 				rot.Pitch = 0;
 			}
-			rot.Roll = 0;
+			if (Cast<ASGCharacter>(GetPawn())->IsCameraReversed) {
+				rot.Roll = 180;
+			}
+			else {
+				rot.Roll = 0;
+			}
 			springArm->SetRelativeRotation(rot);
 		}
 	}
