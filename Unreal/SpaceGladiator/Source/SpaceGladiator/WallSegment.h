@@ -9,7 +9,7 @@
 #include "Components/SplineMeshComponent.h"
 //#include "SGCharacter.h"
 #include "WallSegment.generated.h"
-
+#define CAPSULE_RADIUS 200
 UCLASS()
 class SPACEGLADIATOR_API AWallSegment : public AActor
 {
@@ -81,4 +81,13 @@ public:
 	FColor InitialWallColor;
 	UFUNCTION(BlueprintCallable, Category = "Space Gladiator|Walls")
 	void DestroyWall();
+
+	float BreakingCooldown;
+	float BreakingCooldownLeft;
+private:
+	void BreakWall(AActor *breaker);
+	void BreakSegment(AWallSegment *breakingSegment, FVector breakLocation, int &NearResult);
+	void ProjectOnSegment(FVector &o, FVector &r, FVector &p, float &t);
+	AWallSegment *FindSegmentToBreak(bool forwardSearch, FVector breakLocation, int &NearResult);
+	int IsSegmentNearBreakPoint(AWallSegment *segment, FVector &breakLocation);
 };

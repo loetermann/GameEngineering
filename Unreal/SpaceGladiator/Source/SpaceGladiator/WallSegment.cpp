@@ -58,6 +58,8 @@ AWallSegment::AWallSegment()
 	Spline->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	Spline->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 
+	BreakingCooldown = 1.0f;
+	BreakingCooldownLeft = 0.0f;
 }
 
 // Called when the game starts or when spawned
@@ -86,6 +88,13 @@ void AWallSegment::Tick(float DeltaTime)
 	}
 	//IgnoreOverlapTime -= DeltaTime;
 	//IgnoreOverlapTime = IgnoreOverlapTime < 0 ? 0.0f : IgnoreOverlapTime;
+	if (BreakingCooldownLeft > 0.0f) {
+		BreakingCooldownLeft -= DeltaTime;
+	}
+	else if(BreakingCooldownLeft < 0.0f)
+	{
+		BreakingCooldownLeft = 0.0f;
+	}
 }
 
 void AWallSegment::OnConstruction(const FTransform & Transform)
@@ -169,7 +178,15 @@ void AWallSegment::OnBeginOverlap(AActor *OtherActor) {
 	if (OtherActor->GetClass()->IsChildOf(ASGCharacter::StaticClass())) {
 		ASGCharacter *ref = (ASGCharacter*)OtherActor;
 		if (ref->CurrentWall != this && IsValid(GetOwner())) {
-			ref->TakeDamage(100, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
+			if (true) {
+				if (BreakingCooldownLeft == 0.0f) {
+					BreakingCooldownLeft = BreakingCooldown;
+					BreakWall(ref);
+				}
+			}
+			else {
+				ref->TakeDamage(100, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
+			}
 		}
 	}
 }
@@ -226,4 +243,161 @@ void AWallSegment::DestroyWall() {
 			forwardWallRef->Destroy();
 	}
 	this->Destroy();
+}
+
+void AWallSegment::BreakWall(AActor *breaker) {
+	int NearResult = 0;
+	AWallSegment *breakingSegment = FindSegmentToBreak(true, breaker->GetActorLocation(), NearResult);
+	if (NearResult == 0) {
+		BreakSegment(breakingSegment, breaker->GetActorLocation(), NearResult);
+	}
+	else {
+		if (NearResult == 3) {
+			AWallSegment *WallToDestroy = this->NextSegment;
+			if (IsValid(NextSegment)) {
+				NextSegment->PrevSegment = NULL;
+				NextSegment->DestroyWall();
+				this->NextSegment = NULL;
+			}
+		}
+		else {
+			AWallSegment *WallToDestory = this->NextSegment;
+			if (IsValid(breakingSegment->PrevSegment) && IsValid(WallToDestory)) {
+				breakingSegment->PrevSegment->NextSegment = NULL;
+				breakingSegment->PrevSegment = NULL;
+				WallToDestory->PrevSegment = NULL;
+				WallToDestory->DestroyWall();
+				this->NextSegment = NULL;
+			}
+			BreakSegment(breakingSegment, breaker->GetActorLocation(), NearResult);
+		}
+		if (breakingSegment != this) {
+			breakingSegment = FindSegmentToBreak(false, breaker->GetActorLocation(), NearResult);
+			if (NearResult == 3) {
+				AWallSegment *WallToDestroy = this->PrevSegment;
+				if (IsValid(PrevSegment)) {
+					PrevSegment->NextSegment= NULL;
+					PrevSegment->DestroyWall();
+					this->PrevSegment= NULL;
+				}
+			}
+			else {
+				AWallSegment *WallToDestory = this->PrevSegment;
+				if (IsValid(breakingSegment->NextSegment) && IsValid(WallToDestory)) {
+					breakingSegment->NextSegment->PrevSegment = NULL;
+					breakingSegment->NextSegment = NULL;
+					WallToDestory->NextSegment = NULL;
+					WallToDestory->DestroyWall();
+					this->PrevSegment = NULL;
+				}
+				BreakSegment(breakingSegment, breaker->GetActorLocation(), NearResult);
+			}
+		}
+	}
+}
+
+void AWallSegment::BreakSegment(AWallSegment *breakingSegment, FVector breakLocation, int &NearResult) {
+	float t;
+	USplineComponent *spline;
+	FVector o, r;
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this->GetOwner();
+	SpawnParams.Instigator = Instigator;
+	AWallSegment *newWallSegment;
+	if (!IsValid(breakingSegment)) {
+		return;
+	}
+	switch (NearResult) {
+	case 0:
+		spline = breakingSegment->Spline;
+		o = spline->GetLocationAtSplinePoint(0, ESplineCoordinateSpace::World);
+		r = (spline->GetLocationAtSplinePoint(1, ESplineCoordinateSpace::World) - o).GetSafeNormal();
+		ProjectOnSegment(o,r,breakLocation,t);
+
+		//DEBUG
+		DrawDebugPoint(GetWorld(), breakLocation + CAPSULE_RADIUS*r, 25, FColor::Green, false, 10.0f, 0);
+		DrawDebugPoint(GetWorld(), breakLocation - CAPSULE_RADIUS*r, 25, FColor::Blue, false, 10.0f, 0);
+
+		//DEBUG END
+
+		
+		newWallSegment = GetWorld()->SpawnActor<AWallSegment>(AWallSegment::StaticClass(), breakLocation+CAPSULE_RADIUS*r, GetActorRotation(), SpawnParams);
+		newWallSegment->NextSegment = breakingSegment->NextSegment;
+		if (IsValid(newWallSegment->NextSegment)) {
+			newWallSegment->NextSegment->PrevSegment = newWallSegment;
+		}
+		newWallSegment->PrevSegment = NULL;
+		newWallSegment->SetBeamColor(InitialWallColor);
+		newWallSegment->SetBeamSource(newWallSegment);
+		newWallSegment->SetBeamTarget(breakingSegment->NextSegment);
+		newWallSegment->SetActorEnableCollision(true);
+		newWallSegment->Spline->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+		if(IsValid(breakingSegment->NextSegment))
+			newWallSegment->UpdateSplineLocation(breakingSegment->NextSegment->GetActorLocation());
+
+		newWallSegment = GetWorld()->SpawnActor<AWallSegment>(AWallSegment::StaticClass(), breakLocation - CAPSULE_RADIUS*r, GetActorRotation(), SpawnParams);
+		newWallSegment->NextSegment = NULL;
+		newWallSegment->PrevSegment = breakingSegment;
+		newWallSegment->WallBeams->DestroyComponent();
+		newWallSegment->Spline->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		newWallSegment->Spline->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		breakingSegment->NextSegment = newWallSegment;
+		breakingSegment->SetBeamTarget(newWallSegment);
+		breakingSegment->SetActorEnableCollision(true);
+		breakingSegment->UpdateSplineLocation(newWallSegment->GetActorLocation());
+		//TODO Possible Workaround -> Exchange breakingSegment with new one?!
+		break;
+	case 1:
+		break;
+	case 2:
+		break;
+	default:
+		break;
+	}
+
+}
+
+void AWallSegment::ProjectOnSegment(FVector &o, FVector &r, FVector &p, float &t) {
+	t = ((p - o)*r)|r;
+	p = o + FMath::Abs(t)*r;
+}
+
+AWallSegment *AWallSegment::FindSegmentToBreak(bool forwardSearch, FVector breakLocation, int &NearResult) {
+	if (IsSegmentNearBreakPoint(this, breakLocation) == 0) {
+		NearResult = 0;
+		return this;
+	}
+	AWallSegment *traversingRef = 0;
+	if (forwardSearch ? IsValid(NextSegment) : IsValid(PrevSegment)) {
+		traversingRef = forwardSearch ? NextSegment : PrevSegment;
+
+		while (forwardSearch ? IsValid(traversingRef->NextSegment) : IsValid(traversingRef->PrevSegment)) {
+			traversingRef = forwardSearch ? traversingRef->NextSegment : traversingRef->PrevSegment;
+			if (forwardSearch ? IsValid(traversingRef->PrevSegment) : IsValid(traversingRef->NextSegment)) {
+				AWallSegment *checkedSegment = forwardSearch ? traversingRef->PrevSegment : traversingRef->NextSegment;
+				int result = IsSegmentNearBreakPoint(checkedSegment, breakLocation);
+				if (result > 0 && result < 3) {
+					NearResult = result;
+					return checkedSegment;
+				}
+			}
+		}
+		if (IsValid(traversingRef)) {
+			NearResult = IsSegmentNearBreakPoint(traversingRef, breakLocation);
+			return traversingRef;
+		}
+	}
+	return NULL;
+}
+
+int AWallSegment::IsSegmentNearBreakPoint(AWallSegment *segment, FVector &breakLocation) {
+	if (!IsValid(segment)) {
+		return 0;
+	}
+	USplineComponent *segmentSpline = segment->Spline;
+	FVector start = segmentSpline->GetLocationAtSplinePoint(0, ESplineCoordinateSpace::World);
+	FVector end = segmentSpline->GetLocationAtSplinePoint(1, ESplineCoordinateSpace::World);
+	int IsStartNear = (start - breakLocation).Size() < 2 * CAPSULE_RADIUS ? 1 : 0;
+	int IsEndNear = (end - breakLocation).Size() < 2 * CAPSULE_RADIUS ? 2 : 0;
+	return (IsStartNear + IsEndNear);//0 - nothing near | 1 - start near | 2 - end near | 3 - both near
 }
