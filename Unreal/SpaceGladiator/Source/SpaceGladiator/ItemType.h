@@ -27,8 +27,8 @@ static TCHAR* ItemGlowTextures[] = {
 	TEXT("Texture2D'/Game/Materials/ItemMaterials/ItemInvertControls.ItemInvertControls'"),
 	TEXT("Texture2D'/Game/Materials/ItemMaterials/ItemInvertCamera.ItemInvertCamera'"),
 	TEXT("Texture2D'/Game/Materials/ItemMaterials/ItemMagnet.ItemMagnet'"),
-	TEXT("Texture2D'/Game/Materials/ItemMaterials/ItemBomb.ItemBomb'"),
-	TEXT("Texture2D'/Game/Materials/ItemMaterials/ItemDetonator.ItemDetonator'"),
+	TEXT("Texture2D'/Game/Materials/ItemMaterials/ItemAbsorb.ItemAbsorb'"),
+	TEXT("Texture2D'/Game/Materials/ItemMaterials/ItemUnstoppable.ItemUnstoppable'"),
 };
 
 static TCHAR* ItemIcons[] = {
@@ -37,6 +37,6 @@ static TCHAR* ItemIcons[] = {
 	TEXT("Texture2D'/Game/Items/InvertCamera.InvertCamera'"),
 	TEXT("Texture2D'/Game/Items/Magnet.Magnet'"),
 	// TODO: Replace with new icons
-	TEXT("Texture2D'/Game/Items/bomb.bomb'"),
-	TEXT("Texture2D'/Game/Items/ClusterMine.ClusterMine'"),
+	TEXT("Texture2D'/Game/Items/Absorb.Absorb'"),
+	TEXT("Texture2D'/Game/Items/Unstoppable.Unstoppable'"),
 };
