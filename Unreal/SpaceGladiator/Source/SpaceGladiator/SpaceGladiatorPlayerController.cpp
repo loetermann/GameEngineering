@@ -75,8 +75,12 @@ void ASpaceGladiatorPlayerController::TurnRight() {
 
 void ASpaceGladiatorPlayerController::Turn(float Value) {
 	FRotator rot = FRotator(0,10.0f * Value, 0);
-		RotateCamera(rot);
-		RotateTargeting(rot);
+	if (Cast<ASGCharacter>(GetPawn())->IsCameraReversed) {
+		rot.Yaw = rot.Yaw * (-1);
+	}
+
+	RotateCamera(rot);
+	RotateTargeting(rot);
 }
 
 void ASpaceGladiatorPlayerController::TiltCamera(float Value) {
@@ -91,6 +95,7 @@ void ASpaceGladiatorPlayerController::RotateCamera(FRotator Rotation) {
 			springArm->AddRelativeRotation(Rotation);
 			FTransform transform = springArm->GetRelativeTransform();
 			FRotator rot = transform.Rotator();
+
 			if (rot.Pitch < -75) {
 				rot.Pitch = -75;
 			}
