@@ -169,7 +169,7 @@ void AWallSegment::OnBeginOverlap(AActor *OtherActor) {
 	if (OtherActor->GetClass()->IsChildOf(ASGCharacter::StaticClass())) {
 		ASGCharacter *ref = (ASGCharacter*)OtherActor;
 		if (ref->CurrentWall != this && IsValid(GetOwner())) {
-			ref->TakeDamage(100, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
+			ref->TakeDamage(300, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
 		}
 	}
 }
