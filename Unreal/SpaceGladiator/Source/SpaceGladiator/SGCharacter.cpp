@@ -340,6 +340,21 @@ float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEv
 			}
 		}
 
+
+		if (IsValid(GetController()) && IsValid(EventInstigator) && IsValid(DamageCauser) && IsValid(EventInstigator->GetPawn()->PlayerState) && IsValid(PlayerState)) {
+			if (!(EventInstigator == GetController())) {
+
+				ASGCharacter* character = Cast<ASGCharacter>(EventInstigator->GetPawn());
+				int& value = Cast<ASGPlayerState>(PlayerState)->DamageSuffered.FindOrAdd(character);
+
+				Cast<ASGPlayerState>(PlayerState)->DamageSuffered.Add(Cast<ASGCharacter>(EventInstigator->GetPawn()), value + FMath::Min(ActualDamage, Health));
+
+			}
+		}
+
+
+
+
 		Health -= ActualDamage;
 		if (Health <= 0) {
 
@@ -352,6 +367,28 @@ float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEv
 					EventInstigator->GetPawn()->PlayerState->Score++;
 				}
 				Cast<ASGPlayerState>(PlayerState)->Deaths++;
+
+
+				for (auto& Elem : Cast<ASGPlayerState>(PlayerState)->DamageSuffered)
+				{
+
+					ASGCharacter* actor = Elem.Key;
+					int& val = Elem.Value;
+					if (actor == Cast<ASGCharacter>(EventInstigator->GetPawn())) {
+						continue;
+					}
+					FString message = FString::Printf(TEXT(" assisted with %d total damage for terminating "), val);
+
+					GEngine->AddOnScreenDebugMessage(-1, 15.0f, actor->Color.ToFColor(false), Cast<ASGPlayerState>(actor->PlayerState)->PlayerName + message + *PlayerState->PlayerName);
+					if (val > 50) {
+						Cast<ASGPlayerState>(actor->PlayerState)->Assists++;
+					}
+
+				}
+
+				Cast<ASGPlayerState>(PlayerState)->DamageSuffered.Reset();
+
+
 
 
 				FString message;

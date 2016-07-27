@@ -13,4 +13,5 @@ void ASGPlayerState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 	DOREPLIFETIME(ASGPlayerState, Kills);
 	DOREPLIFETIME(ASGPlayerState, Assists);
 	DOREPLIFETIME(ASGPlayerState, Deaths);
+	DOREPLIFETIME(ASGPlayerState, DamageSuffered);
 }

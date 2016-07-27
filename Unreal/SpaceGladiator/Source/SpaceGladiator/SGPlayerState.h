@@ -3,6 +3,9 @@
 #pragma once
 
 #include "GameFramework/PlayerState.h"
+#include "SGCharacter.h"
+#include "Runtime/Core/Public/Containers/ContainersFwd.h"
+
 #include "SGPlayerState.generated.h"
 
 /**
@@ -22,5 +25,7 @@ public:
 		int32 Assists;
 		UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Stats)
 		int32 Deaths;
+		UPROPERTY(Replicated, EditAnywhere, Category = Stats)
+		TMap<ASGCharacter*, int32> DamageSuffered;
 
 };
