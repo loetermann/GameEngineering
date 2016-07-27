@@ -201,7 +201,7 @@ void AWallSegment::OnBeginOverlap(AActor *OtherActor) {
 				}
 			}
 			else {
-				ref->TakeDamage(100, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
+				ref->TakeDamage(300, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
 			}
 		}
 	}
