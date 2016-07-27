@@ -1,0 +1,60 @@
+static const float e = 2.71828182846;
+static const float pi = 3.14159203;
+
+float angleBetweenVectors(float3 v1, float3 v2) {
+	return acos(dot(v1, v2)/length(v1)/length(v2));
+}
+
+float angleBetweenVectors(float2 v1, float2 v2) {
+	return acos(dot(v1, v2)/length(v1)/length(v2));
+}
+
+float IntensityGaussFunction(float blend, float blendMax, float x) {
+	return blend/blendMax * pow(e, - pow(blend*x, 2) );
+}
+
+float CoordToIntensity(float coord, float blend, float blendMax, int cellcount) {
+	float x = (coord*cellcount)%1;
+	return IntensityGaussFunction(blend, blendMax, x) + IntensityGaussFunction(blend, blendMax, 1-x);
+}
+
+float CalcIntensity(FMaterialPixelParameters Parameters, float2 texCoords, int cellcount, float totalIntensity, float minAngleOffset, float maxDepth) {
+	float depth = clamp(Parameters.ScreenPosition.w/maxDepth, 0.0, 1.0);
+	float3 viewVector = mul(MaterialFloat3(0.0, 0.0, 1.0), (MaterialFloat3x3)(View.ViewToTranslatedWorld));
+	float viewAngle = angleBetweenVectors(viewVector, float3(0, 0, 1.0));
+	viewAngle = clamp(viewAngle/pi+minAngleOffset, 0.0, 1.0);
+	float blendMax = 1.75/totalIntensity;
+	float blend = pow((1-depth)*viewAngle, 5)*blendMax;
+	float intensity;
+	if(blend<totalIntensity*blendMax) {
+		intensity = totalIntensity;
+	} else {
+		intensity = max(CoordToIntensity(texCoords.x, blend, blendMax, cellcount), CoordToIntensity(texCoords.y, blend, blendMax, cellcount));
+	}
+	return intensity * (1-depth);
+}
+
+float4 CalcColor(FMaterialPixelParameters Parameters, float4 color, float3 characterPosition, float fireLoad, float maxProjectileSpeed, float colorBoost, float intensity) {
+	if(fireLoad < 0.05) {
+		color = float4(1, 1, 1, 0);
+	} else {
+		float3 pixelPos = GetWorldPosition(Parameters);
+		float distance = length(characterPosition - pixelPos);
+		float fireDistance = pow((fireLoad*0.8+0.2), 2)*maxProjectileSpeed;
+		if(distance > fireDistance) {
+			color = float4(1, 1, 1, 1);
+		} else {
+			color = clamp(color, 0.0, 1.0)*colorBoost;
+			if(distance >= 1000 && abs(distance - fireDistance) < 100) { // highlight the border of the radius
+				color *= 50;
+			}else { // hightlight fire direction for easier targeting
+				float3 viewVector = mul(MaterialFloat3(0.0, 0.0, 1.0), (MaterialFloat3x3)(View.ViewToTranslatedWorld));
+				float pixelInFireDir = angleBetweenVectors(viewVector.rg, (pixelPos - characterPosition).rg);
+				if(distance >= 250 && pixelInFireDir < 16/distance) {
+					return color;
+				}
+			}
+		}
+	}
+	return color*intensity;
+}
