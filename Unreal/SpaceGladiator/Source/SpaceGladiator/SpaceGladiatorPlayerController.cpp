@@ -8,6 +8,8 @@
 #include "SpaceGladiatorGameMode.h"
 
 ASpaceGladiatorPlayerController::ASpaceGladiatorPlayerController(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer) {
+	IsControlInverted = true;
+	LeftTimeForInvertControl = 0.0f;
 }
 
 void ASpaceGladiatorPlayerController::BeginPlayingState() {
@@ -46,13 +48,17 @@ void ASpaceGladiatorPlayerController::TurnLeft() {
 	if (!Cast<ASGCharacter>(GetPawn())->IsAlive()) {
 		return;
 	}
+	float InvertFactor = 1.0f;
+	if (IsControlInverted) {
+		InvertFactor = -1.0f;
+	}
 	UE_LOG(LogTemp, Warning, TEXT("TurnLeft"));
 	//APawn *Pawn = GetControlledPawn();
 	//Pawn->set
 	FRotator rotation = ControlRotation;
-	rotation.Add(0, -90.0f, 0);
+	rotation.Add(0, -90.0f * InvertFactor, 0);
 	SetControlRotation(rotation);
-	FRotator rot = FRotator(0, 90.0f, 0);
+	FRotator rot = FRotator(0, 90.0f * InvertFactor, 0);
 	RotateCamera(rot);
 	RotateTargeting(rot);
 
@@ -63,11 +69,15 @@ void ASpaceGladiatorPlayerController::TurnRight() {
 	if (!Cast<ASGCharacter>(GetPawn())->IsAlive()) {
 		return;
 	}
+	float InvertFactor = 1.0f;
+	if (IsControlInverted) {
+		InvertFactor = -1.0f;
+	}
 	UE_LOG(LogTemp, Warning, TEXT("TurnRight"));
 	FRotator rotation = ControlRotation;
-	rotation.Add(0, 90.0f, 0);
+	rotation.Add(0, 90.0f * InvertFactor, 0);
 	SetControlRotation(rotation);
-	FRotator rot = FRotator(0, -90.0f, 0);
+	FRotator rot = FRotator(0, -90.0f * InvertFactor, 0);
 	RotateCamera(rot);
 	RotateTargeting(rot);
 	Cast<ASGCharacter>(GetPawn())->AddWallSegment();
@@ -133,6 +143,14 @@ void ASpaceGladiatorPlayerController::PlayerTick(float DeltaTime) {
 	if (IsValid(pawn) && Cast<ASGCharacter>(GetPawn())->IsAlive()) {
 		pawn->GetMovementComponent()->AddInputVector(pawn->GetActorForwardVector());
 	}
+
+	if (LeftTimeForInvertControl < 0.0f) {
+		LeftTimeForInvertControl = 0.0f;
+		IsControlInverted = false;
+	}
+	else {
+		LeftTimeForInvertControl -= DeltaTime;
+	}
 }
 
 void ASpaceGladiatorPlayerController::FireHold() {
@@ -170,4 +188,14 @@ bool ASpaceGladiatorPlayerController::IsPlacingWalls() {
 
 void ASpaceGladiatorPlayerController::UseItem() {
 	Cast<ASGCharacter>(GetPawn())->UseItem();
+}
+
+void ASpaceGladiatorPlayerController::InvertControls()
+{
+	IsControlInverted = true;
+	LeftTimeForInvertControl += 3.0f;
+}
+
+bool ASpaceGladiatorPlayerController::GetIsControlInverted() {
+	return IsControlInverted;
 }

@@ -13,7 +13,9 @@ class SPACEGLADIATOR_API ASpaceGladiatorPlayerController : public APlayerControl
 {
 	GENERATED_BODY()
 	
-	
+	bool IsControlInverted;
+
+	float LeftTimeForInvertControl;
 public:
 	ASpaceGladiatorPlayerController(const FObjectInitializer &ObjectInitializer);
 	void BeginPlayingState() override;
@@ -24,11 +26,14 @@ public:
 	void RotateTargeting(FRotator Rotation);
 	void Turn(float Value);
 	void TiltCamera(float Value);
-	void PlayerTick(float DeltaTime);
+	virtual void PlayerTick(float DeltaTime) override;
 	void FireHold();
 	void Fire();
 	void Recall();
 	void PlaceWall();
 	bool IsPlacingWalls();
 	void UseItem();
+	UFUNCTION(BlueprintCallable, Category="Spacegladiator")
+	void InvertControls();
+	bool GetIsControlInverted();
 };

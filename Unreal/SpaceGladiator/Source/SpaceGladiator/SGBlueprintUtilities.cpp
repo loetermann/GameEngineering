@@ -36,6 +36,12 @@ FVector USGBlueprintUtilities::CalculateAIAiming(APawn *shooter, APawn *target, 
 	result.Normalize();
 	//DrawDebugPoint(shooter->GetWorld(), t+v*t2, 150, FColor(0, 0, 255),false,0.2f);
 	//result = result.RotateAngleAxis(90.0f, FVector(0, 0, 1));
+	//todo add gaussian distribution
+	float uncertainty = FMath::FRandRange(-20, 20);
+	
+	FRotator rot = FRotator(0, uncertainty, 0);
+	result = rot.RotateVector(result);
+	
 	return result;
 }
 
