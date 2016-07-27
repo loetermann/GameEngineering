@@ -63,6 +63,7 @@ void ASGCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 void ASGCharacter::BeginPlay()
 {
 	Health = 100;
+	Shield = 0;
 	Super::BeginPlay();
 }
 
@@ -314,51 +315,74 @@ float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEv
 		return 0;
 	}
 	// Call the base class - this will tell us how much damage to apply  
-	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser); 
-	Health -= ActualDamage;
-	if (Health <= 0) {
+	float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
-		if (IsValid(GetController()) && IsValid(EventInstigator) && IsValid(DamageCauser)&& IsValid(EventInstigator->GetPawn()->PlayerState) && IsValid(PlayerState)) {
-			if (EventInstigator->GetPawn() == this) {
-				EventInstigator->GetPawn()->PlayerState->Score--;
+	if (AbsorbsProjectiles && 
+		(DamageCauser->GetClass()->IsChildOf(ALaserProjectile::StaticClass())))
+	{
+		Shield += ActualDamage;
+		if (Shield > MaxShield) { Shield = MaxShield; }
+	}
+	else 
+	{
+		if (Shield > 0) {
+			Shield -= ActualDamage;
+
+			// Is there still damage to apply?
+			if (Shield < 0) { 
+				ActualDamage = -Shield;
+				Shield = 0; 
+			} else {
+				ActualDamage = 0;
 			}
-			else {
-				Cast<ASGPlayerState>(EventInstigator->GetPawn()->PlayerState)->Kills++;
-				EventInstigator->GetPawn()->PlayerState->Score++;
-			}
-			Cast<ASGPlayerState>(PlayerState)->Deaths++;
-			
-			
-			FString message;
-			if (EventInstigator== GetController()) {
-				message = FString::Printf(TEXT("%s committed suicide"), *PlayerState->PlayerName);
-			}
-			else {
-				message = FString::Printf(TEXT("%s killed %s with %s"),  *EventInstigator->GetPawn()->PlayerState->PlayerName, *PlayerState->PlayerName, *DamageCauser->GetClass()->GetName());
-			}
+		}
+
+		Health -= ActualDamage;
+		if (Health <= 0) {
+
+			if (IsValid(GetController()) && IsValid(EventInstigator) && IsValid(DamageCauser) && IsValid(EventInstigator->GetPawn()->PlayerState) && IsValid(PlayerState)) {
+				if (EventInstigator->GetPawn() == this) {
+					EventInstigator->GetPawn()->PlayerState->Score--;
+				}
+				else {
+					Cast<ASGPlayerState>(EventInstigator->GetPawn()->PlayerState)->Kills++;
+					EventInstigator->GetPawn()->PlayerState->Score++;
+				}
+				Cast<ASGPlayerState>(PlayerState)->Deaths++;
 
 
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, Cast<ASGCharacter>(EventInstigator->GetPawn())->Color.ToFColor(false), message);
-		}
-		if (CurrentWall) {
-			PlaceWall();
-		}
-		explode();
-		for (TActorIterator<ALaserProjectile> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-		{
-			if (ActorItr->GetOwner() == this) {
-				ActorItr->Destroy();
+				FString message;
+				if (EventInstigator == GetController()) {
+					message = FString::Printf(TEXT("%s committed suicide"), *PlayerState->PlayerName);
+				}
+				else {
+					message = FString::Printf(TEXT("%s killed %s with %s"), *EventInstigator->GetPawn()->PlayerState->PlayerName, *PlayerState->PlayerName, *DamageCauser->GetClass()->GetName());
+				}
+
+
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, Cast<ASGCharacter>(EventInstigator->GetPawn())->Color.ToFColor(false), message);
 			}
-		}
-		for (TActorIterator<AWallSegment> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-		{
-			if (ActorItr->GetOwner() == this) {
-				ActorItr->DestroyWall();
+			if (CurrentWall) {
+				PlaceWall();
 			}
+			explode();
+			for (TActorIterator<ALaserProjectile> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+			{
+				if (ActorItr->GetOwner() == this) {
+					ActorItr->Destroy();
+				}
+			}
+			for (TActorIterator<AWallSegment> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+			{
+				if (ActorItr->GetOwner() == this) {
+					ActorItr->DestroyWall();
+				}
+			}
+			SetActorHiddenInGame(true);
+			SetActorEnableCollision(false);
+			GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ASGCharacter::respawn, 0.75);
 		}
-		SetActorHiddenInGame(true);
-		SetActorEnableCollision(false);
-		GetWorldTimerManager().SetTimer(RespawnTimerHandle, this, &ASGCharacter::respawn, 0.75);
+		
 	}
 	return ActualDamage;
 }
@@ -416,6 +440,7 @@ void ASGCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutL
 	DOREPLIFETIME(ASGCharacter, MaxFireLoadTime);
 	DOREPLIFETIME(ASGCharacter, CurrentWall);
 	DOREPLIFETIME(ASGCharacter, ItemType);
+	DOREPLIFETIME(ASGCharacter, Shield);
 }
 
 bool ASGCharacter::IsAlive() {

@@ -27,6 +27,13 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Player)
 		float Health;
 
+	/** Shield */
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Player)
+		float Shield;
+	
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Player)
+		float MaxShield = 100;
+
 	/** Color */
 	UPROPERTY(ReplicatedUsing = ColorChanged, EditAnywhere, BlueprintReadWrite, Category = Player)
 	FLinearColor Color;
