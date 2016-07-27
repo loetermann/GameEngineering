@@ -199,6 +199,8 @@ void ASGCharacter::PlaceWall_Implementation() {
 //		CurrentWall->IgnoreOverlapTime = 0.1f;
 		CurrentWall->SetBeamTarget(newWallSegment);
 		CurrentWall = 0;
+		CurrentWallCooldown = WallCooldown;
+		CurrentWallTime = 0.0f;
 		return;
 	}
 	if (!IsAlive() || IsInvincible() || CurrentWallCooldown) {
@@ -214,7 +216,6 @@ void ASGCharacter::PlaceWall_Implementation() {
 	CurrentWall->SetBeamColor(FColor(Color.R,Color.G,Color.B,Color.A));
 
 	CurrentWallTime = 0.0f;
-	CurrentWallCooldown = WallCooldown;
 }
 bool ASGCharacter::PlaceWall_Validate() {
 	return true;
@@ -411,6 +412,12 @@ void ASGCharacter::revive() {
 	}
 	//GetWorld()->GetAuthGameMode()->RestartPlayer(GetController());
 	Health = 100;
+	Shield = 0;
+	CurrentWallTime = 0;
+	CurrentWallCooldown = 0;
+	AbsorbsProjectiles = false;
+	ItemType = EItemType::ItemType_None;
+	IsUnstoppable = false;
 	SetActorEnableCollision(true);
 
 	GetWorldTimerManager().SetTimer(PunishTimerHandle, this, &ASGCharacter::punish, 12.5);
@@ -441,6 +448,8 @@ void ASGCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutL
 	DOREPLIFETIME(ASGCharacter, CurrentWall);
 	DOREPLIFETIME(ASGCharacter, ItemType);
 	DOREPLIFETIME(ASGCharacter, Shield);
+	DOREPLIFETIME(ASGCharacter, CurrentWallTime);
+	DOREPLIFETIME(ASGCharacter, CurrentWallCooldown);
 }
 
 bool ASGCharacter::IsAlive() {

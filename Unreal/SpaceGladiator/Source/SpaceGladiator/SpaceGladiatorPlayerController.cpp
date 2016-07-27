@@ -75,7 +75,7 @@ void ASpaceGladiatorPlayerController::TurnRight() {
 
 void ASpaceGladiatorPlayerController::Turn(float Value) {
 	FRotator rot = FRotator(0,10.0f * Value, 0);
-	if (Cast<ASGCharacter>(GetPawn())->IsCameraReversed) {
+	if (IsValid(GetPawn()) && Cast<ASGCharacter>(GetPawn())->IsCameraReversed) {
 		rot.Yaw = rot.Yaw * (-1);
 	}
 

@@ -137,9 +137,13 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Player)
 	EItemType ItemType;
 
+	UPROPERTY(BlueprintReadOnly, Category = Player)
 	float WallMaxTime;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Player)
 	float CurrentWallTime;
+	UPROPERTY(BlueprintReadOnly, Category = Player)
 	float WallCooldown;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Player)
 	float CurrentWallCooldown;
 
 	bool HasReversedControlls;
