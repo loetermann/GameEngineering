@@ -4,6 +4,7 @@
 #include "SGCharacter.h"
 #include "WallSegment.h"
 #include "UnrealNetwork.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 
 // Sets default values
@@ -58,8 +59,10 @@ AWallSegment::AWallSegment()
 	Spline->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	Spline->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 
-	BreakingCooldown = 1.0f;
+	BreakingCooldown = 0.1f;
 	BreakingCooldownLeft = 0.0f;
+
+	updateRepetition = 0.0f;
 }
 
 // Called when the game starts or when spawned
@@ -95,6 +98,14 @@ void AWallSegment::Tick(float DeltaTime)
 	{
 		BreakingCooldownLeft = 0.0f;
 	}
+	
+	if (updateRepetition > 0.0f) {
+		updateRepetition -= DeltaTime;
+		UpdateSplineMesh();
+	}
+	else if (updateRepetition < 0.0f) {
+		updateRepetition = 0.0f;
+	}
 }
 
 void AWallSegment::OnConstruction(const FTransform & Transform)
@@ -112,6 +123,8 @@ void AWallSegment::UpdateSplineMesh() {
 
 	//UE_LOG(LogTemp, Warning, TEXT("Adding Spline Mesh!!!!"));
 	
+	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("UpdateSplineMesh %s"), *this->GetName()));
+
 	if (!SplineMeshComponent) {
 		SplineMeshComponent = NewObject<USplineMeshComponent>(this, USplineMeshComponent::StaticClass());//<USplineMeshComponent>(USplineMeshComponent::StaticClass(), this);
 	}
@@ -178,16 +191,113 @@ void AWallSegment::OnBeginOverlap(AActor *OtherActor) {
 	if (OtherActor->GetClass()->IsChildOf(ASGCharacter::StaticClass())) {
 		ASGCharacter *ref = (ASGCharacter*)OtherActor;
 		if (ref->CurrentWall != this && IsValid(GetOwner())) {
+			//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%s overlapping with %s"), *this->GetName(),*ref->GetName()));
 			if (true) {
 				if (BreakingCooldownLeft == 0.0f) {
 					BreakingCooldownLeft = BreakingCooldown;
-					BreakWall(ref);
+					//BreakWall(ref);
+					//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("COLLISION %s"), *OtherActor->GetName()));
+					BreakWallNew(ref);
 				}
 			}
 			else {
 				ref->TakeDamage(100, FDamageEvent(), Cast<ASGCharacter>(GetOwner())->GetController(), this);
 			}
 		}
+	}
+}
+
+void AWallSegment::BreakWallNew(AActor *breaker) {
+	AWallSegment *newWallSegment;
+	FVector breakLocation = breaker->GetActorLocation();
+	int result = IsSegmentNearBreakPoint(this, breakLocation);
+	USplineComponent *spline;
+	FVector o, r;
+	float t;
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this->GetOwner();
+	SpawnParams.Instigator = Instigator;
+	spline = this->Spline;
+	o = spline->GetLocationAtSplinePoint(0, ESplineCoordinateSpace::World);
+	r = (spline->GetLocationAtSplinePoint(1, ESplineCoordinateSpace::World) - o).GetSafeNormal();
+	ProjectOnSegment(o, r, breakLocation, t);
+	//DEBUG
+	//DrawDebugPoint(GetWorld(), breakLocation + CAPSULE_RADIUS*r, 25, FColor::Green, false, 10.0f, 0);
+	//DrawDebugPoint(GetWorld(), breakLocation - CAPSULE_RADIUS*r, 25, FColor::Blue, false, 10.0f, 0);
+	//AWallSegment *savedPrevSegment = NULL;
+	//AWallSegment *savedNextSegment = NULL;
+
+	AWallSegment *exchangedSegment;
+	//DEBUG END
+	switch (result) {
+	case 0:
+		exchangedSegment = GetWorld()->SpawnActor<AWallSegment>(AWallSegment::StaticClass(), this->GetActorLocation(), GetActorRotation(), SpawnParams);
+		exchangedSegment->SetActorEnableCollision(true);
+
+		newWallSegment = GetWorld()->SpawnActor<AWallSegment>(AWallSegment::StaticClass(), breakLocation + CAPSULE_RADIUS*r, GetActorRotation(), SpawnParams);
+		newWallSegment->NextSegment = this->NextSegment;
+		if (IsValid(newWallSegment->NextSegment)) {
+			newWallSegment->NextSegment->PrevSegment = newWallSegment;
+		}
+		newWallSegment->PrevSegment = NULL;
+		newWallSegment->SetBeamColor(InitialWallColor);
+		newWallSegment->SetBeamSource(newWallSegment);
+		newWallSegment->SetBeamTarget(this->NextSegment);
+		newWallSegment->SetActorEnableCollision(true);
+		newWallSegment->Spline->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+		if (IsValid(this->NextSegment)) {
+			newWallSegment->UpdateSplineLocation(this->NextSegment->GetActorLocation());
+			newWallSegment->updateRepetition = 0.5f;
+		}
+
+		newWallSegment = GetWorld()->SpawnActor<AWallSegment>(AWallSegment::StaticClass(), breakLocation - CAPSULE_RADIUS*r, GetActorRotation(), SpawnParams);
+		newWallSegment->NextSegment = NULL;
+		newWallSegment->PrevSegment = exchangedSegment;
+		newWallSegment->WallBeams->DestroyComponent();
+		newWallSegment->Spline->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		newWallSegment->Spline->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		exchangedSegment->NextSegment = newWallSegment;
+		exchangedSegment->SetBeamTarget(newWallSegment);
+		exchangedSegment->SetActorEnableCollision(true);
+		exchangedSegment->UpdateSplineLocation(newWallSegment->GetActorLocation());
+		exchangedSegment->updateRepetition = 0.5f;
+
+		exchangedSegment->SetBeamColor(InitialWallColor);
+
+		exchangedSegment->PrevSegment = this->PrevSegment;
+		
+		this->NextSegment = NULL;
+		this->PrevSegment = NULL;
+		this->DestroyWall();
+		break;
+	case 1: // start near
+		this->SetActorLocation(breakLocation + CAPSULE_RADIUS * r);
+		this->updateRepetition = 0.5f;
+		break;
+	case 2: // end near
+		newWallSegment = GetWorld()->SpawnActor<AWallSegment>(AWallSegment::StaticClass(), breakLocation - CAPSULE_RADIUS*r, GetActorRotation(), SpawnParams);
+		newWallSegment->NextSegment = NULL;
+		newWallSegment->PrevSegment = this;
+		newWallSegment->WallBeams->DestroyComponent();
+		newWallSegment->Spline->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		newWallSegment->Spline->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		this->NextSegment = newWallSegment;
+		this->SetBeamTarget(newWallSegment);
+		this->SetActorEnableCollision(true);
+		this->UpdateSplineLocation(newWallSegment->GetActorLocation());
+		this->updateRepetition = 0.5f;
+		break;
+	case 3: // both near
+		if (IsValid(this->NextSegment)) {
+			this->NextSegment->PrevSegment = NULL;
+		}
+		if (IsValid(this->PrevSegment)) {
+			this->PrevSegment->NextSegment = NULL;
+		}
+		this->DestroyWall();
+		break;
+	default:
+		break;
 	}
 }
 
@@ -246,6 +356,7 @@ void AWallSegment::DestroyWall() {
 }
 
 void AWallSegment::BreakWall(AActor *breaker) {
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%s broken by %s"), *this->GetName(), *breaker->GetName()));
 	int NearResult = 0;
 	AWallSegment *breakingSegment = FindSegmentToBreak(true, breaker->GetActorLocation(), NearResult);
 	if (NearResult == 0) {
@@ -307,6 +418,7 @@ void AWallSegment::BreakSegment(AWallSegment *breakingSegment, FVector breakLoca
 	if (!IsValid(breakingSegment)) {
 		return;
 	}
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("hiho %s"),*breakingSegment->GetName()));
 	switch (NearResult) {
 	case 0:
 		spline = breakingSegment->Spline;
@@ -359,6 +471,7 @@ void AWallSegment::BreakSegment(AWallSegment *breakingSegment, FVector breakLoca
 
 void AWallSegment::ProjectOnSegment(FVector &o, FVector &r, FVector &p, float &t) {
 	t = ((p - o)*r)|r;
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Projecting %s on %s with t = %f."),*p.ToString(),*(o+t*r).ToString(),t));
 	p = o + FMath::Abs(t)*r;
 }
 

@@ -84,7 +84,10 @@ public:
 
 	float BreakingCooldown;
 	float BreakingCooldownLeft;
+
+	float updateRepetition;
 private:
+	void BreakWallNew(AActor *breaker);
 	void BreakWall(AActor *breaker);
 	void BreakSegment(AWallSegment *breakingSegment, FVector breakLocation, int &NearResult);
 	void ProjectOnSegment(FVector &o, FVector &r, FVector &p, float &t);
