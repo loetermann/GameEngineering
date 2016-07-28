@@ -5,6 +5,7 @@
 #include "WallSegment.h"
 #include "UnrealNetwork.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -63,6 +64,15 @@ AWallSegment::AWallSegment()
 	BreakingCooldownLeft = 0.0f;
 
 	updateRepetition = 0.0f;
+
+	ConstructorHelpers::FObjectFinder<UParticleSystem> explosionFinder(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Explosion.P_Explosion'"));
+	if (explosionFinder.Object) {
+		this->ExplosionSystem = explosionFinder.Object;
+	}
+	else {
+		this->ExplosionSystem = NULL;
+	}
+
 }
 
 // Called when the game starts or when spawned
@@ -299,6 +309,12 @@ void AWallSegment::BreakWallNew(AActor *breaker) {
 	default:
 		break;
 	}
+	if (IsValid(ExplosionSystem)) {
+		FVector explosionPoint = breaker->GetActorLocation();
+		ProjectOnSegment(o, r, explosionPoint, t);
+
+		UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionSystem, explosionPoint);
+	}
 }
 
 void AWallSegment::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
@@ -471,7 +487,7 @@ void AWallSegment::BreakSegment(AWallSegment *breakingSegment, FVector breakLoca
 
 void AWallSegment::ProjectOnSegment(FVector &o, FVector &r, FVector &p, float &t) {
 	t = ((p - o)*r)|r;
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Projecting %s on %s with t = %f."),*p.ToString(),*(o+t*r).ToString(),t));
+	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Projecting %s on %s with t = %f."),*p.ToString(),*(o+t*r).ToString(),t));
 	p = o + FMath::Abs(t)*r;
 }
 

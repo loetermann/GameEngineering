@@ -86,6 +86,8 @@ public:
 	float BreakingCooldownLeft;
 
 	float updateRepetition;
+	UPROPERTY(EditAnyWhere, Category = "SpaceGladiator|Walls")
+	UParticleSystem *ExplosionSystem;
 private:
 	void BreakWallNew(AActor *breaker);
 	void BreakWall(AActor *breaker);
