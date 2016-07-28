@@ -280,6 +280,10 @@ void ASGCharacter::UseItem_Implementation() {
 				for (TActorIterator<ASGCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 				{
 					ActorItr->IsCameraReversed = true;
+					ASpaceGladiatorPlayerController *controller;
+					if (*ActorItr != this && (controller = Cast<ASpaceGladiatorPlayerController>(ActorItr->GetController())) != NULL)
+						controller->InvertCamera();
+
 				}
 				// TODO: Actually flip camera
 

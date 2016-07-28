@@ -16,6 +16,7 @@ class SPACEGLADIATOR_API ASpaceGladiatorPlayerController : public APlayerControl
 	bool IsControlInverted;
 
 	float LeftTimeForInvertControl;
+	float LeftTimeForInvertCamera;
 public:
 	ASpaceGladiatorPlayerController(const FObjectInitializer &ObjectInitializer);
 	void BeginPlayingState() override;
@@ -35,5 +36,6 @@ public:
 	void UseItem();
 	UFUNCTION(BlueprintCallable, Category="Spacegladiator")
 	void InvertControls();
+	void InvertCamera();
 	bool GetIsControlInverted();
 };

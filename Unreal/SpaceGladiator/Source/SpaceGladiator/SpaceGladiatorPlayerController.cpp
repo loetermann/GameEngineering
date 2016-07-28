@@ -151,6 +151,14 @@ void ASpaceGladiatorPlayerController::PlayerTick(float DeltaTime) {
 	else {
 		LeftTimeForInvertControl -= DeltaTime;
 	}
+
+	if (LeftTimeForInvertCamera < 0.0f) {
+		LeftTimeForInvertCamera = 0.0f;
+		((ASGCharacter*)GetPawn())->IsCameraReversed = false;
+	}
+	else {
+		LeftTimeForInvertCamera -= DeltaTime;
+	}
 }
 
 void ASpaceGladiatorPlayerController::FireHold() {
@@ -194,6 +202,10 @@ void ASpaceGladiatorPlayerController::InvertControls()
 {
 	IsControlInverted = true;
 	LeftTimeForInvertControl += 3.0f;
+}
+
+void ASpaceGladiatorPlayerController::InvertCamera() {
+	LeftTimeForInvertCamera += 3.0f;
 }
 
 bool ASpaceGladiatorPlayerController::GetIsControlInverted() {
