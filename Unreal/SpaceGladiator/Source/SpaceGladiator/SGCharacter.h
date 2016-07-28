@@ -12,6 +12,8 @@ UCLASS()
 class SPACEGLADIATOR_API ASGCharacter : public ACharacter
 {
 	GENERATED_BODY()
+
+		
 		
 public:
 
@@ -146,8 +148,15 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Player)
 	float CurrentWallCooldown;
 
+
+
+	UPROPERTY(BlueprintReadOnly, Category = Player)
+	float LeftTimeForInvertControl;
+	UPROPERTY(BlueprintReadOnly, Category = Player)
+	float LeftTimeForInvertCamera;
+
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Player)
-	bool HasReversedControlls;
+	bool IsControlInverted;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Player)
 	bool IsCameraReversed;
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Player)

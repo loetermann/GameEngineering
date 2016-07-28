@@ -16,6 +16,9 @@ ASGCharacter::ASGCharacter()
 	WallCooldown = 5.0f;
 	CurrentWallCooldown = 0.0f;
 
+	LeftTimeForInvertControl = 0.0f;
+	LeftTimeForInvertCamera = 0.0f;
+
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -95,6 +98,25 @@ void ASGCharacter::Tick( float DeltaTime )
 	if (CurrentWallCooldown < 0.0f) {
 		CurrentWallCooldown = 0.0f;
 	}
+
+
+	if (LeftTimeForInvertControl < 0.0f) {
+		LeftTimeForInvertControl = 0.0f;
+		IsControlInverted = false;
+	}
+	else {
+		LeftTimeForInvertControl -= DeltaTime;
+	}
+
+	if (LeftTimeForInvertCamera < 0.0f) {
+		LeftTimeForInvertCamera = 0.0f;
+		IsCameraReversed = false;
+	}
+	else {
+		LeftTimeForInvertCamera -= DeltaTime;
+	}
+
+
 }
 
 // Called to bind functionality to input
@@ -268,10 +290,10 @@ void ASGCharacter::UseItem_Implementation() {
 			case EItemType::ItemType_InvertControls: {
 				for (TActorIterator<ASGCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 				{
-					ActorItr->HasReversedControlls = true;
-					ASpaceGladiatorPlayerController *controller;
-					if (*ActorItr != this && (controller = Cast<ASpaceGladiatorPlayerController>(ActorItr->GetController())) != NULL)
-						controller->InvertControls();
+					if (*ActorItr != this) {
+						ActorItr->LeftTimeForInvertControl += 9.0f;
+						ActorItr->IsControlInverted = true;
+					}
 				}
 
 			} break;
@@ -279,13 +301,11 @@ void ASGCharacter::UseItem_Implementation() {
 			case EItemType::ItemType_InvertCamera: {
 				for (TActorIterator<ASGCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 				{
-					ActorItr->IsCameraReversed = true;
-					ASpaceGladiatorPlayerController *controller;
-					if (*ActorItr != this && (controller = Cast<ASpaceGladiatorPlayerController>(ActorItr->GetController())) != NULL)
-						controller->InvertCamera();
-
+					if (*ActorItr != this) {
+						ActorItr->LeftTimeForInvertCamera += 9.0f;
+						ActorItr->IsCameraReversed = true;
+					}
 				}
-				// TODO: Actually flip camera
 
 			} break;
 
@@ -493,7 +513,7 @@ void ASGCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutL
 	DOREPLIFETIME(ASGCharacter, Shield);
 	DOREPLIFETIME(ASGCharacter, CurrentWallTime);
 	DOREPLIFETIME(ASGCharacter, CurrentWallCooldown);
-	DOREPLIFETIME(ASGCharacter, HasReversedControlls);
+	DOREPLIFETIME(ASGCharacter, IsControlInverted);
 	DOREPLIFETIME(ASGCharacter, IsCameraReversed);
 	DOREPLIFETIME(ASGCharacter, AbsorbsProjectiles);
 	DOREPLIFETIME(ASGCharacter, IsUnstoppable);

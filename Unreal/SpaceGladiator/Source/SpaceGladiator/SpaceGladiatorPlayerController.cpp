@@ -8,8 +8,7 @@
 #include "SpaceGladiatorGameMode.h"
 
 ASpaceGladiatorPlayerController::ASpaceGladiatorPlayerController(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer) {
-	IsControlInverted = true;
-	LeftTimeForInvertControl = 0.0f;
+	//IsControlInverted = true;
 }
 
 void ASpaceGladiatorPlayerController::BeginPlayingState() {
@@ -49,7 +48,7 @@ void ASpaceGladiatorPlayerController::TurnLeft() {
 		return;
 	}
 	float InvertFactor = 1.0f;
-	if (IsControlInverted) {
+	if (Cast<ASGCharacter>(GetPawn())->IsControlInverted) {
 		InvertFactor = -1.0f;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("TurnLeft"));
@@ -70,7 +69,7 @@ void ASpaceGladiatorPlayerController::TurnRight() {
 		return;
 	}
 	float InvertFactor = 1.0f;
-	if (IsControlInverted) {
+	if (Cast<ASGCharacter>(GetPawn())->IsControlInverted) {
 		InvertFactor = -1.0f;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("TurnRight"));
@@ -146,22 +145,6 @@ void ASpaceGladiatorPlayerController::PlayerTick(float DeltaTime) {
 	if (Cast<ASGCharacter>(GetPawn())->IsAlive()) {
 		pawn->GetMovementComponent()->AddInputVector(pawn->GetActorForwardVector());
 	}
-
-	if (LeftTimeForInvertControl < 0.0f) {
-		LeftTimeForInvertControl = 0.0f;
-		IsControlInverted = false;
-	}
-	else {
-		LeftTimeForInvertControl -= DeltaTime;
-	}
-
-	if (LeftTimeForInvertCamera < 0.0f) {
-		LeftTimeForInvertCamera = 0.0f;
-		((ASGCharacter*)GetPawn())->IsCameraReversed = false;
-	}
-	else {
-		LeftTimeForInvertCamera -= DeltaTime;
-	}
 }
 
 void ASpaceGladiatorPlayerController::FireHold() {
@@ -200,17 +183,6 @@ bool ASpaceGladiatorPlayerController::IsPlacingWalls() {
 void ASpaceGladiatorPlayerController::UseItem() {
 	Cast<ASGCharacter>(GetPawn())->UseItem();
 }
-
-void ASpaceGladiatorPlayerController::InvertControls()
-{
-	IsControlInverted = true;
-	LeftTimeForInvertControl += 3.0f;
-}
-
-void ASpaceGladiatorPlayerController::InvertCamera() {
-	LeftTimeForInvertCamera += 3.0f;
-}
-
 bool ASpaceGladiatorPlayerController::GetIsControlInverted() {
-	return IsControlInverted;
+	return Cast<ASGCharacter>(GetPawn())->IsControlInverted;
 }
