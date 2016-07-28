@@ -146,9 +146,13 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Player)
 	float CurrentWallCooldown;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Player)
 	bool HasReversedControlls;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Player)
 	bool IsCameraReversed;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Player)
 	bool AbsorbsProjectiles;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Player)
 	bool IsUnstoppable;
 
 private:

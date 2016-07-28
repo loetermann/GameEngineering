@@ -493,6 +493,10 @@ void ASGCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutL
 	DOREPLIFETIME(ASGCharacter, Shield);
 	DOREPLIFETIME(ASGCharacter, CurrentWallTime);
 	DOREPLIFETIME(ASGCharacter, CurrentWallCooldown);
+	DOREPLIFETIME(ASGCharacter, HasReversedControlls);
+	DOREPLIFETIME(ASGCharacter, IsCameraReversed);
+	DOREPLIFETIME(ASGCharacter, AbsorbsProjectiles);
+	DOREPLIFETIME(ASGCharacter, IsUnstoppable);
 }
 
 bool ASGCharacter::IsAlive() {
