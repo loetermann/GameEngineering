@@ -25,7 +25,7 @@ public:
 		int32 Assists;
 		UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Stats)
 		int32 Deaths;
-		UPROPERTY(Replicated, EditAnywhere, Category = Stats)
+		UPROPERTY(EditAnywhere, Category = Stats)
 		TMap<ASGCharacter*, int32> DamageSuffered;
 
 };

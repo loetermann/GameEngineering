@@ -12,10 +12,9 @@ AItemActor::AItemActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	SetActorEnableCollision(true);
-
+	bReplicates = true;
 	YawPerSeconds = 150.0f;
 	ItemType = EItemType::ItemType_Magnet;
-
 	// Our root component will be a sphere that reacts to physics
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
 	RootComponent = SphereComponent;
@@ -23,9 +22,13 @@ AItemActor::AItemActor()
 	SphereComponent->InitSphereRadius(SphereRadius);
 	SphereComponent->SetRelativeLocation(FVector(0.0f, 0.0f, SphereRadius));
 	SphereComponent->SetCollisionProfileName(TEXT("ItemCage"));
+	SphereComponent->SetNetAddressable();
+	SphereComponent->SetIsReplicated(true);
 
 	Cage = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Cage"));
 	Cage->AttachTo(RootComponent);
+	Cage->SetNetAddressable();
+	Cage->SetIsReplicated(true);
 		
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CageFinder(TEXT("StaticMesh'/Game/Items/ItemCage.ItemCage'"));
 	if (CageFinder.Succeeded()) {
@@ -46,6 +49,8 @@ AItemActor::AItemActor()
 
 	Item = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Item"));
 	Item->AttachTo(SphereComponent);
+	Item->SetNetAddressable();
+	Item->SetIsReplicated(true);
 	
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ItemFinder(TEXT("StaticMesh'/Game/Items/Item.Item'"));
 	if (ItemFinder.Succeeded()) {
@@ -82,7 +87,7 @@ AItemActor::AItemActor()
 void AItemActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -128,10 +133,12 @@ void AItemActor::PostActorCreated()
 void AItemActor::ChangeMaterial() 
 {
 	UTexture* ItemBitmap = Cast<UTexture>(StaticLoadObject(UTexture::StaticClass(), NULL, ItemGlowTextures[(uint8)ItemType]));
-	ItemMaterial->SetTextureParameterValue("GlowMask", ItemBitmap);
+	if (IsValid(ItemMaterial) && IsValid(CageMaterial) && IsValid(ItemBitmap)) {
+		ItemMaterial->SetTextureParameterValue("GlowMask", ItemBitmap);
 
-	ItemMaterial->SetVectorParameterValue("GlowColor", ItemColors[(uint8)ItemType]);
-	CageMaterial->SetVectorParameterValue("GlowColor", ItemColors[(uint8)ItemType]);
+		ItemMaterial->SetVectorParameterValue("GlowColor", ItemColors[(uint8)ItemType]);
+		CageMaterial->SetVectorParameterValue("GlowColor", ItemColors[(uint8)ItemType]);
+	}
 }
 
 void AItemActor::SetItemType(EItemType NewItemType)
@@ -146,6 +153,13 @@ void AItemActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLif
 
 	// Replicate to everyone
 	DOREPLIFETIME(AItemActor, ItemType);
+	DOREPLIFETIME(AItemActor, Cage);
+	DOREPLIFETIME(AItemActor, CageMaterial);
+	DOREPLIFETIME(AItemActor, CageMesh);
+	DOREPLIFETIME(AItemActor, Item);
+	DOREPLIFETIME(AItemActor, ItemMesh);
+	DOREPLIFETIME(AItemActor, ItemMaterial);
+	DOREPLIFETIME(AItemActor, SphereComponent);
 }
 
 void AItemActor::SetSpawnPoint(AActor *p) {

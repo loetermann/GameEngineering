@@ -140,7 +140,10 @@ void ASpaceGladiatorPlayerController::RotateTargeting(FRotator Rotation) {
 void ASpaceGladiatorPlayerController::PlayerTick(float DeltaTime) {
 	Super::PlayerTick(DeltaTime);
 	APawn *pawn = GetPawn();
-	if (IsValid(pawn) && Cast<ASGCharacter>(GetPawn())->IsAlive()) {
+	if (!IsValid(pawn)) {
+		return;
+	}
+	if (Cast<ASGCharacter>(GetPawn())->IsAlive()) {
 		pawn->GetMovementComponent()->AddInputVector(pawn->GetActorForwardVector());
 	}
 

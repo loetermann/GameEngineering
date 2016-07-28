@@ -318,7 +318,7 @@ float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEv
 	if (IsInvincible()&&DamageCauser!=this) {
 		return 0;
 	}
-	if (!IsAlive() && HasAuthority()) {
+	if (!IsAlive() || !HasAuthority()) {
 		return 0;
 	}
 	// Call the base class - this will tell us how much damage to apply  
