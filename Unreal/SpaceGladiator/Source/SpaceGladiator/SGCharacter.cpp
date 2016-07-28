@@ -291,7 +291,7 @@ void ASGCharacter::UseItem_Implementation() {
 				for (TActorIterator<ASGCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 				{
 					if (*ActorItr != this) {
-						ActorItr->LeftTimeForInvertControl += 9.0f;
+						ActorItr->LeftTimeForInvertControl += 3.0f;
 						ActorItr->IsControlInverted = true;
 					}
 				}
@@ -302,7 +302,7 @@ void ASGCharacter::UseItem_Implementation() {
 				for (TActorIterator<ASGCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 				{
 					if (*ActorItr != this) {
-						ActorItr->LeftTimeForInvertCamera += 9.0f;
+						ActorItr->LeftTimeForInvertCamera += 4.0f;
 						ActorItr->IsCameraReversed = true;
 					}
 				}
