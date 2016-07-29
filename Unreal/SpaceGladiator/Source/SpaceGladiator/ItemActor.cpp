@@ -153,13 +153,6 @@ void AItemActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLif
 
 	// Replicate to everyone
 	DOREPLIFETIME(AItemActor, ItemType);
-	DOREPLIFETIME(AItemActor, Cage);
-	DOREPLIFETIME(AItemActor, CageMaterial);
-	DOREPLIFETIME(AItemActor, CageMesh);
-	DOREPLIFETIME(AItemActor, Item);
-	DOREPLIFETIME(AItemActor, ItemMesh);
-	DOREPLIFETIME(AItemActor, ItemMaterial);
-	DOREPLIFETIME(AItemActor, SphereComponent);
 }
 
 void AItemActor::SetSpawnPoint(AActor *p) {

@@ -75,23 +75,24 @@ void ASGCharacter::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
-	if (HasAuthority()) {
-		//UE_LOG(LogTemp, Warning, TEXT("Ticking!!!!"));
-		if (GetActorLocation().Z < 600) {
-			TakeDamage(100, FDamageEvent(), GetController(), this);
-		}
-		if (FireLoad != 0 && FireLoad < MaxFireLoadTime) {
-			FireLoad += DeltaTime;
-			if (FireLoad > MaxFireLoadTime) {
-				FireLoad = MaxFireLoadTime;
-			}
-		}
-	}
 	if (IsValid(CurrentWall)) {
 		CurrentWall->UpdateSplineLocation_Implementation(GetActorLocation());
 		CurrentWallTime += DeltaTime;
 		if (CurrentWallTime > WallMaxTime && HasAuthority()) {
 			PlaceWall();
+		}
+	}
+	if (!HasAuthority()) {
+		return;
+	}
+	//UE_LOG(LogTemp, Warning, TEXT("Ticking!!!!"));
+	if (GetActorLocation().Z < 600) {
+		TakeDamage(100, FDamageEvent(), GetController(), this);
+	}
+	if (FireLoad != 0 && FireLoad < MaxFireLoadTime) {
+		FireLoad += DeltaTime;
+		if (FireLoad > MaxFireLoadTime) {
+			FireLoad = MaxFireLoadTime;
 		}
 	}
 	CurrentWallCooldown -= DeltaTime;

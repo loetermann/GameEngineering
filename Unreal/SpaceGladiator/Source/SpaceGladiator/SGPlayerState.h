@@ -25,6 +25,8 @@ public:
 		int32 Assists;
 		UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Stats)
 		int32 Deaths;
+		UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Player)
+		FLinearColor Color;
 		UPROPERTY(EditAnywhere, Category = Stats)
 		TMap<ASGCharacter*, int32> DamageSuffered;
 

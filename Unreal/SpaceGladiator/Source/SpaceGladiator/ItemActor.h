@@ -43,7 +43,7 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USphereComponent* SphereComponent;
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = Enum)
+	UPROPERTY(ReplicatedUsing = ChangeMaterial, EditAnywhere, BlueprintReadWrite, Category = Enum)
 	EItemType ItemType;
 
 	UFUNCTION()
