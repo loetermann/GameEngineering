@@ -217,7 +217,12 @@ void AWallSegment::OnBeginOverlap(AActor *OtherActor) {
 	}
 }
 
-void AWallSegment::BreakWallNew(AActor *breaker) {
+void AWallSegment::HideBeams_Implementation()
+{
+	WallBeams->DestroyComponent();
+}
+
+void AWallSegment::BreakWallNew_Implementation(AActor *breaker) {
 	AWallSegment *newWallSegment;
 	FVector breakLocation = breaker->GetActorLocation();
 	int result = IsSegmentNearBreakPoint(this, breakLocation);
@@ -263,7 +268,8 @@ void AWallSegment::BreakWallNew(AActor *breaker) {
 		newWallSegment = GetWorld()->SpawnActor<AWallSegment>(AWallSegment::StaticClass(), breakLocation - CAPSULE_RADIUS*r, GetActorRotation(), SpawnParams);
 		newWallSegment->NextSegment = NULL;
 		newWallSegment->PrevSegment = exchangedSegment;
-		newWallSegment->WallBeams->DestroyComponent();
+		//newWallSegment->WallBeams->DestroyComponent();
+		newWallSegment->HideBeams();
 		newWallSegment->Spline->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		newWallSegment->Spline->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		exchangedSegment->NextSegment = newWallSegment;
@@ -278,6 +284,12 @@ void AWallSegment::BreakWallNew(AActor *breaker) {
 		
 		this->NextSegment = NULL;
 		this->PrevSegment = NULL;
+		if (IsValid(ExplosionSystem)) {
+			FVector explosionPoint = breaker->GetActorLocation();
+			ProjectOnSegment(o, r, explosionPoint, t);
+			exchangedSegment->PlayExplosionAt(explosionPoint);
+			//UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionSystem, explosionPoint);
+		}
 		this->DestroyWall();
 		break;
 	case 1: // start near
@@ -288,7 +300,8 @@ void AWallSegment::BreakWallNew(AActor *breaker) {
 		newWallSegment = GetWorld()->SpawnActor<AWallSegment>(AWallSegment::StaticClass(), breakLocation - CAPSULE_RADIUS*r, GetActorRotation(), SpawnParams);
 		newWallSegment->NextSegment = NULL;
 		newWallSegment->PrevSegment = this;
-		newWallSegment->WallBeams->DestroyComponent();
+		//newWallSegment->WallBeams->DestroyComponent();
+		newWallSegment->HideBeams();
 		newWallSegment->Spline->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		newWallSegment->Spline->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		this->NextSegment = newWallSegment;
@@ -312,9 +325,13 @@ void AWallSegment::BreakWallNew(AActor *breaker) {
 	if (IsValid(ExplosionSystem)) {
 		FVector explosionPoint = breaker->GetActorLocation();
 		ProjectOnSegment(o, r, explosionPoint, t);
-
-		UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionSystem, explosionPoint);
+		PlayExplosionAt(explosionPoint);
+		//UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionSystem, explosionPoint);
 	}
+}
+
+bool AWallSegment::BreakWallNew_Validate(AActor *breaker) {
+	return true;
 }
 
 void AWallSegment::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
@@ -529,4 +546,11 @@ int AWallSegment::IsSegmentNearBreakPoint(AWallSegment *segment, FVector &breakL
 	int IsStartNear = (start - breakLocation).Size() < 2 * CAPSULE_RADIUS ? 1 : 0;
 	int IsEndNear = (end - breakLocation).Size() < 2 * CAPSULE_RADIUS ? 2 : 0;
 	return (IsStartNear + IsEndNear);//0 - nothing near | 1 - start near | 2 - end near | 3 - both near
+}
+
+
+void AWallSegment::PlayExplosionAt_Implementation(FVector position) {
+	if (IsValid(ExplosionSystem)) {
+		UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionSystem, position);
+	}
 }

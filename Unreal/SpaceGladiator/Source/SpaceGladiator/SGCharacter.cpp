@@ -216,7 +216,8 @@ void ASGCharacter::PlaceWall_Implementation() {
 		AWallSegment *newWallSegment = GetWorld()->SpawnActor<AWallSegment>(WallSegmentClass, GetActorLocation(), GetActorRotation(), SpawnParams);
 //		newWallSegment->IgnoreOverlapTime = 0.1;
 		newWallSegment->PrevSegment = CurrentWall;
-		newWallSegment->WallBeams->DestroyComponent();
+		//newWallSegment->WallBeams->DestroyComponent();
+		newWallSegment->HideBeams();
 		newWallSegment->SetBeamColor(FColor(Color.R, Color.G, Color.B, Color.A));
 		CurrentWall->NextSegment = newWallSegment;
 //		CurrentWall->IgnoreOverlapTime = 0.1f;

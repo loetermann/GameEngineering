@@ -88,8 +88,19 @@ public:
 	float updateRepetition;
 	UPROPERTY(EditAnyWhere, Category = "SpaceGladiator|Walls")
 	UParticleSystem *ExplosionSystem;
+
+	UFUNCTION(NetmultiCast, Reliable, Category = "SpaceGladiator|Walls")
+	void HideBeams();
+	void HideBeams_Implementation();
+
+	UFUNCTION(NetmultiCast, Unreliable, Category = "SpaceGladiator|Walls")
+	void PlayExplosionAt(FVector Position);
+	void PlayExplosionAt_Implementation(FVector Position);
 private:
+	UFUNCTION(Reliable, Server, WithValidation, BlueprintCallable, Category = "SpaceGladiator")
 	void BreakWallNew(AActor *breaker);
+	void BreakWallNew_Implementation(AActor *breaker);
+	bool BreakWallNew_Validate(AActor *breaker);
 	void BreakWall(AActor *breaker);
 	void BreakSegment(AWallSegment *breakingSegment, FVector breakLocation, int &NearResult);
 	void ProjectOnSegment(FVector &o, FVector &r, FVector &p, float &t);
