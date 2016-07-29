@@ -18,6 +18,8 @@ ASGCharacter::ASGCharacter()
 
 	LeftTimeForInvertControl = 0.0f;
 	LeftTimeForInvertCamera = 0.0f;
+	LeftTimeForAbsorbProjectiles = 0.0f;
+	LeftTimeForUnstoppable = 0.0f;
 
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -117,6 +119,23 @@ void ASGCharacter::Tick( float DeltaTime )
 		LeftTimeForInvertCamera -= DeltaTime;
 	}
 
+
+	if (LeftTimeForAbsorbProjectiles < 0.0f) {
+		LeftTimeForAbsorbProjectiles = 0.0f;
+		AbsorbsProjectiles = false;
+	}
+	else {
+		LeftTimeForAbsorbProjectiles -= DeltaTime;
+	}
+
+
+	if (LeftTimeForUnstoppable < 0.0f) {
+		LeftTimeForUnstoppable = 0.0f;
+		IsUnstoppable = false;
+	}
+	else {
+		LeftTimeForUnstoppable -= DeltaTime;
+	}
 
 }
 
@@ -287,7 +306,6 @@ void ASGCharacter::UseItem_Implementation() {
 				}
 			} break;
 
-			// TODO: Start a Timer and set back to normal for all Items 
 
 			case EItemType::ItemType_InvertControls: {
 				for (TActorIterator<ASGCharacter> ActorItr(GetWorld()); ActorItr; ++ActorItr)
@@ -313,12 +331,12 @@ void ASGCharacter::UseItem_Implementation() {
 
 			case EItemType::ItemType_ProjectileAbsorb: {
 				AbsorbsProjectiles = true;
-				// TODO: Handle the AbsorbsProjectiles Flag in TakeDamage
+				LeftTimeForAbsorbProjectiles = 5.0f;
 
 			} break;
 
 			case EItemType::ItemType_Unstoppable: {
-				// TODO: Handle the IsUnstoppable Flag in TakeDamage and Wall Collision
+				LeftTimeForUnstoppable = 5.0f;
 				IsUnstoppable = true;
 
 			} break;
@@ -403,9 +421,9 @@ float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEv
 					if (actor == Cast<ASGCharacter>(EventInstigator->GetPawn())) {
 						continue;
 					}
-					FString message = FString::Printf(TEXT(" assisted with %d total damage for terminating "), val);
+				//	FString message = FString::Printf(TEXT(" assisted with %d total damage for terminating "), val);
 
-					GEngine->AddOnScreenDebugMessage(-1, 15.0f, actor->Color.ToFColor(false), Cast<ASGPlayerState>(actor->PlayerState)->PlayerName + message + *PlayerState->PlayerName);
+					//GEngine->AddOnScreenDebugMessage(-1, 15.0f, actor->Color.ToFColor(false), Cast<ASGPlayerState>(actor->PlayerState)->PlayerName + message + *PlayerState->PlayerName);
 					if (val > 50) {
 						Cast<ASGPlayerState>(actor->PlayerState)->Assists++;
 					}
@@ -425,7 +443,7 @@ float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEv
 					message = FString::Printf(TEXT("%s killed %s with %s"), *EventInstigator->GetPawn()->PlayerState->PlayerName, *PlayerState->PlayerName, *DamageCauser->GetClass()->GetName());
 				}
 
-
+				const FVector2D TextScale(2.0f, 2.0f);
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, Cast<ASGCharacter>(EventInstigator->GetPawn())->Color.ToFColor(false), message);
 			}
 			if (CurrentWall) {
@@ -462,11 +480,14 @@ void ASGCharacter::respawn() {
 		return;
 	}
 	AActor* spawnPoint = GetWorld()->GetAuthGameMode()->ChoosePlayerStart(GetController());
+
 	SetActorRotation(spawnPoint->GetActorForwardVector().Rotation()); //FOR AI
 	GetController()->SetControlRotation(spawnPoint->GetActorForwardVector().Rotation()); //FOR PLAYER
+
 	SetActorLocation(spawnPoint->GetActorLocation());
 	SetActorEnableCollision(true);
 	SetActorHiddenInGame(false);
+	GEngine->AddOnScreenDebugMessage(-1, 20, FColor(255, 255, 255, 255), GetActorForwardVector().Rotation().ToString() + " " + spawnPoint->GetActorForwardVector().Rotation().ToString());
 	
 	GetWorldTimerManager().SetTimer(ReviveTimerHandle, this, &ASGCharacter::revive, 0.75);
 }
@@ -490,14 +511,14 @@ void ASGCharacter::revive() {
 
 void ASGCharacter::punish() {
 	if (IsInvincible()) {
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, Color.ToFColor(false), "YOU GOT PUNISHED");
-		TakeDamage(100,FDamageEvent(),GetController(),this);
+
+		FString message;
+		message = FString::Printf(TEXT("%s committed suicide"), *PlayerState->PlayerName);
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, Color.ToFColor(false), message);
+		TakeDamage(300,FDamageEvent(),GetController(),this);
 		
 	}
-	else{
-//		GEngine->AddOnScreenDebugMessage(-1, 15.0f, Color.ToFColor(false), "you avoided punishment");
 
-	}
 }
 
 

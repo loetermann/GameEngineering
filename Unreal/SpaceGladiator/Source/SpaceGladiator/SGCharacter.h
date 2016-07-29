@@ -154,6 +154,10 @@ public:
 	float LeftTimeForInvertControl;
 	UPROPERTY(BlueprintReadOnly, Category = Player)
 	float LeftTimeForInvertCamera;
+	UPROPERTY(BlueprintReadOnly, Category = Player)
+	float LeftTimeForAbsorbProjectiles;
+	UPROPERTY(BlueprintReadOnly, Category = Player)
+	float LeftTimeForUnstoppable;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Player)
 	bool IsControlInverted;
