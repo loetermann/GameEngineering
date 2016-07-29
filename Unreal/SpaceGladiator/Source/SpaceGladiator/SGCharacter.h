@@ -120,7 +120,10 @@ public:
 	void explode_Implementation();
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Explode"))
 	void explodeEvent();
+	UFUNCTION(Reliable, Server, WithValidation, Category = "SpaceGladiator")
 	void respawn();
+	void respawn_Implementation();
+	bool respawn_Validate();
 	void revive();
 	void punish();
 
@@ -148,7 +151,10 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = Player)
 	float CurrentWallCooldown;
 
-
+	UFUNCTION(NetMulticast, Reliable, WithValidation, Category = "SpaceGladiator")
+		void UpdateRotationAfterSpawn(FRotator rot);
+	void UpdateRotationAfterSpawn_Implementation(FRotator rot);
+	bool UpdateRotationAfterSpawn_Validate(FRotator rot);
 
 	UPROPERTY(BlueprintReadOnly, Category = Player)
 	float LeftTimeForInvertControl;

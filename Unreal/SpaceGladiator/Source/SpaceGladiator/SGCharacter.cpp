@@ -64,6 +64,19 @@ void ASGCharacter::InitComponents() {
 
 void ASGCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) { Super::PostEditChangeProperty(PropertyChangedEvent); InitComponents(); }
 
+void ASGCharacter::UpdateRotationAfterSpawn_Implementation(FRotator rot)
+{
+	SetActorRotation(rot); //FOR AI
+	if(IsValid(GetController()))
+		GetController()->SetControlRotation(rot); //FOR PLAYER
+
+}
+
+bool ASGCharacter::UpdateRotationAfterSpawn_Validate(FRotator rot)
+{
+	return true;
+}
+
 // Called when the game starts or when spawned
 void ASGCharacter::BeginPlay()
 {
@@ -478,14 +491,15 @@ void ASGCharacter::explode_Implementation() {
 	explodeEvent();
 }
 
-void ASGCharacter::respawn() {
+void ASGCharacter::respawn_Implementation() {
 	if (IsAlive()) {
 		return;
 	}
 	AActor* spawnPoint = GetWorld()->GetAuthGameMode()->ChoosePlayerStart(GetController());
 
-	SetActorRotation(spawnPoint->GetActorForwardVector().Rotation()); //FOR AI
-	GetController()->SetControlRotation(spawnPoint->GetActorForwardVector().Rotation()); //FOR PLAYER
+	UpdateRotationAfterSpawn(spawnPoint->GetActorForwardVector().Rotation());
+	//SetActorRotation(spawnPoint->GetActorForwardVector().Rotation()); //FOR AI
+	//GetController()->SetControlRotation(spawnPoint->GetActorForwardVector().Rotation()); //FOR PLAYER
 
 	SetActorLocation(spawnPoint->GetActorLocation());
 	SetActorEnableCollision(true);
@@ -493,6 +507,10 @@ void ASGCharacter::respawn() {
 	GEngine->AddOnScreenDebugMessage(-1, 20, FColor(255, 255, 255, 255), GetActorForwardVector().Rotation().ToString() + " " + spawnPoint->GetActorForwardVector().Rotation().ToString());
 	
 	GetWorldTimerManager().SetTimer(ReviveTimerHandle, this, &ASGCharacter::revive, 0.75);
+}
+
+bool ASGCharacter::respawn_Validate() {
+	return true;
 }
 
 void ASGCharacter::revive() {
