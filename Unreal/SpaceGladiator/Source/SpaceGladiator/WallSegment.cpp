@@ -202,7 +202,7 @@ void AWallSegment::OnBeginOverlap(AActor *OtherActor) {
 		ASGCharacter *ref = (ASGCharacter*)OtherActor;
 		if (ref->CurrentWall != this && IsValid(GetOwner())) {
 			//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%s overlapping with %s"), *this->GetName(),*ref->GetName()));
-			if (true) {
+			if (ref->IsUnstoppable) {
 				if (BreakingCooldownLeft == 0.0f) {
 					BreakingCooldownLeft = BreakingCooldown;
 					//BreakWall(ref);

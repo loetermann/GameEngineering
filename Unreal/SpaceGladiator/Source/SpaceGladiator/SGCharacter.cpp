@@ -361,6 +361,9 @@ float ASGCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEv
 	if (!IsAlive() || !HasAuthority()) {
 		return 0;
 	}
+	if (IsUnstoppable) {
+		return 0.0f;
+	}
 	// Call the base class - this will tell us how much damage to apply  
 	float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
