@@ -504,8 +504,7 @@ void ASGCharacter::respawn_Implementation() {
 	SetActorLocation(spawnPoint->GetActorLocation());
 	SetActorEnableCollision(true);
 	SetActorHiddenInGame(false);
-	GEngine->AddOnScreenDebugMessage(-1, 20, FColor(255, 255, 255, 255), GetActorForwardVector().Rotation().ToString() + " " + spawnPoint->GetActorForwardVector().Rotation().ToString());
-	
+
 	GetWorldTimerManager().SetTimer(ReviveTimerHandle, this, &ASGCharacter::revive, 0.75);
 }
 
